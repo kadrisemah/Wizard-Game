@@ -16,6 +16,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 INSTALL_ON_PHONE.md
+TECHNICAL_ARCHITECTURE.md
 # Environment variables
 .env
 .env.local
