@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate App Icons - Wizard Tournament</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0F172A 0%, #1a1a3e 50%, #0F172A 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 1rem;
+            font-weight: 700;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .icons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .icon-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .icon-item p {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #9CA3AF;
+        }
+
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎴 Wizard Tournament Icon Generator</h1>
+    <p style="color: #9CA3AF; margin-bottom: 2rem;">Generate all app icons for PWA installation</p>
+
+    <button class="button" onclick="generateAllIcons()">Generate All Icons</button>
+
+    <div class="icons-container" id="iconsContainer"></div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const iconSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            canvas.width = size;
+            canvas.height = size;
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#8B5CF6');
+            gradient.addColorStop(1, '#06B6D4');
+
+            // Draw circle background
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw 'W' text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.6}px Orbitron, monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('W', size / 2, size / 2);
+
+            return canvas;
+        }
+
+        function downloadIcon(canvas, size) {
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `icon-${size}x${size}.png`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+
+        function generateAllIcons() {
+            const container = document.getElementById('iconsContainer');
+            container.innerHTML = '';
+
+            iconSizes.forEach((size, index) => {
+                setTimeout(() => {
+                    const canvas = generateIcon(size);
+
+                    // Create preview
+                    const iconItem = document.createElement('div');
+                    iconItem.className = 'icon-item';
+
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL();
+                    img.width = Math.min(size, 128);
+                    img.height = Math.min(size, 128);
+                    img.style.borderRadius = '12px';
+
+                    const text = document.createElement('p');
+                    text.textContent = `${size}x${size}`;
+
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'button';
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.style.padding = '0.5rem 1rem';
+                    downloadBtn.style.fontSize = '0.875rem';
+                    downloadBtn.style.margin = '0.5rem 0 0 0';
+                    downloadBtn.onclick = () => downloadIcon(generateIcon(size), size);
+
+                    iconItem.appendChild(img);
+                    iconItem.appendChild(text);
+                    iconItem.appendChild(downloadBtn);
+                    container.appendChild(iconItem);
+
+                    // Auto-download
+                    downloadIcon(canvas, size);
+                }, index * 300);
+            });
+        }
+
+        // Also generate a favicon
+        function generateFavicon() {
+            const canvas = generateIcon(32);
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'favicon.ico';
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/x-icon');
+        }
+    </script>
+</body>
+</html>

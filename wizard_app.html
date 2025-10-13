@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Wizard Tournament • Professional Score Tracker</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%238B5CF6;stop-opacity:1' /><stop offset='100%25' style='stop-color:%2306B6D4;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='70' font-size='60' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>W</text></svg>">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="./icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-title" content="Wizard">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* Professional Color System */
+            --primary: #8B5CF6;
+            --primary-light: #A78BFA;
+            --primary-dark: #7C3AED;
+            --secondary: #06B6D4;
+            --secondary-light: #22D3EE;
+            --accent: #EC4899;
+            --accent-light: #F472B6;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+
+            /* Dark Professional Theme */
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --bg-tertiary: #334155;
+            --surface: rgba(30, 41, 59, 0.8);
+            --surface-glass: rgba(139, 92, 246, 0.1);
+
+            /* Text Hierarchy */
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --text-muted: #64748B;
+
+            /* Shadows & Effects */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --glow-primary: 0 0 20px rgba(139, 92, 246, 0.5);
+            --glow-secondary: 0 0 20px rgba(6, 182, 212, 0.5);
+            --glow-danger: 0 0 20px rgba(239, 68, 68, 0.5);
+
+            /* Spacing System */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+
+            /* Border Radius System */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+
+            /* Animation Timing */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background System */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                var(--bg-primary) 0%,
+                var(--bg-secondary) 50%,
+                var(--bg-primary) 100%);
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            animation: orbsMove 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-5%, 5%); }
+        }
+
+        @keyframes orbsMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(3%, -3%) rotate(180deg); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Professional Header */
+        .header {
+            text-align: center;
+            padding: var(--space-lg) 0;
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.8; }
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+            position: relative;
+            display: inline-block;
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.6)); }
+            50% { filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.9)); }
+        }
+
+        .tagline {
+            font-size: clamp(0.875rem, 2vw, 1.125rem);
+            color: var(--text-secondary);
+            margin-top: var(--space-sm);
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Glass Card System */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(139, 92, 246, 0.1),
+                transparent);
+            transition: left 0.6s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 12px 48px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: var(--radius-full);
+            box-shadow: var(--glow-primary);
+        }
+
+        /* Input System */
+        .input-group {
+            margin-bottom: var(--space-md);
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xs);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2), var(--glow-primary);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .input-field:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Professional Number Spinner */
+        .number-spinner {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: var(--radius-md);
+            padding: 0.25rem;
+            transition: all var(--transition-base);
+            max-width: 120px;
+        }
+
+        .number-spinner:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        .spinner-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            outline: none;
+            flex-shrink: 0;
+        }
+
+        .spinner-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+        }
+
+        .spinner-btn:active {
+            transform: scale(0.95);
+        }
+
+        .spinner-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner-input {
+            flex: 1;
+            min-width: 40px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            outline: none;
+        }
+
+        /* Large Spinner for Setup */
+        .number-spinner-large {
+            max-width: 100%;
+            padding: 0.5rem;
+        }
+
+        .number-spinner-large .spinner-btn {
+            width: 48px;
+            height: 48px;
+            font-size: 1.5rem;
+        }
+
+        .number-spinner-large .spinner-input {
+            font-size: 1.5rem;
+            min-width: 60px;
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: var(--space-md);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Professional Button System */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: 1rem 2rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            outline: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-md), var(--glow-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), 0 0 35px rgba(139, 92, 246, 0.7);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), 0 0 25px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), var(--glow-danger);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        /* Statistics Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            text-align: center;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+            font-weight: 500;
+        }
+
+        /* Avatar System */
+        .player-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.125rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all var(--transition-base);
+        }
+
+        .player-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            font-size: 3.5rem;
+            border-width: 5px;
+            animation: avatarEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes avatarEntrance {
+            from {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        /* Schedule Box */
+        .schedule-box {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 2px solid rgba(236, 72, 153, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-box::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
+            animation: scheduleGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes scheduleGlow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+        }
+
+        .schedule-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: var(--space-sm);
+        }
+
+        .schedule-items {
+            display: grid;
+            gap: var(--space-xs);
+        }
+
+        .schedule-item {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid var(--accent);
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+        }
+
+        .schedule-item:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: translateX(6px);
+            border-left-color: var(--accent-light);
+        }
+
+        .next-elimination {
+            margin-top: var(--space-sm);
+            padding: var(--space-sm);
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger);
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            color: var(--danger);
+            text-align: center;
+            animation: dangerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dangerPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.7); }
+        }
+
+        /* Game Info Bar */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .info-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Professional Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+        }
+
+        th {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 2px solid rgba(139, 92, 246, 0.5);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        tr {
+            transition: all var(--transition-base);
+        }
+
+        tbody tr:hover:not(.eliminated) {
+            background: rgba(139, 92, 246, 0.15);
+            transform: scale(1.01);
+        }
+
+        tr.eliminated {
+            opacity: 0.35;
+            filter: grayscale(1);
+        }
+
+        tr.eliminated td {
+            text-decoration: line-through;
+        }
+
+        tr.winner {
+            background: rgba(16, 185, 129, 0.25);
+            box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        tr.danger-zone {
+            background: rgba(239, 68, 68, 0.15);
+            animation: dangerFlash 2s ease-in-out infinite;
+        }
+
+        @keyframes dangerFlash {
+            0%, 100% { background: rgba(239, 68, 68, 0.15); }
+            50% { background: rgba(239, 68, 68, 0.3); }
+        }
+
+        /* Professional Badge System */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .badge-eliminated {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-tertiary);
+            border: 1px solid var(--text-tertiary);
+        }
+
+        .badge-winner {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+            animation: winnerShine 1.5s ease-in-out infinite;
+        }
+
+        @keyframes winnerShine {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.9); }
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            animation: dangerPulse 2s ease-in-out infinite;
+        }
+
+        /* Score Display */
+        .score {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .score-positive {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .score-negative {
+            color: var(--danger);
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Rank Display */
+        .rank-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Alert System */
+        .alert {
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            font-weight: 600;
+            border-left: 4px solid;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .alert-info {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--secondary-light);
+            border-color: var(--secondary);
+        }
+
+        /* Professional Footer */
+        .footer {
+            margin-top: var(--space-xl);
+            padding: var(--space-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(139, 92, 246, 0.5) 50%,
+                transparent 100%);
+            margin-bottom: var(--space-md);
+        }
+
+        .designer-signature {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-md) var(--space-lg);
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: var(--radius-lg);
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .designer-signature::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg,
+                rgba(139, 92, 246, 0.1) 0%,
+                rgba(6, 182, 212, 0.1) 50%,
+                rgba(236, 72, 153, 0.1) 100%);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .designer-signature:hover::before {
+            opacity: 1;
+        }
+
+        .designer-signature:hover {
+            border-color: rgba(139, 92, 246, 0.7);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .designer-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .designer-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.75rem;
+            font-weight: 900;
+            background: linear-gradient(135deg,
+                var(--primary-light) 0%,
+                var(--secondary-light) 50%,
+                var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            position: relative;
+            animation: signatureGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes signatureGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.8)); }
+        }
+
+        .designer-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+        }
+
+        /* Professional Custom Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-md);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), var(--glow-primary);
+            animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-md);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        .modal-icon-warning {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .modal-icon-success {
+            background: rgba(245, 158, 11, 0.2);
+            border: 3px solid var(--warning);
+            color: var(--warning);
+            font-size: 4rem;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+            text-align: center;
+            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 1rem 1.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        .modal-btn-cancel {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .modal-btn-cancel:hover {
+            background: rgba(148, 163, 184, 0.3);
+            border-color: rgba(148, 163, 184, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), var(--glow-danger);
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-md), var(--glow-primary);
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), 0 0 35px rgba(139, 92, 246, 0.7);
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--warning);
+            border-radius: 50%;
+            animation: confettiFall 3s ease-out forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Trophy Icon */
+        .trophy-icon {
+            font-size: 6rem;
+            display: inline-block;
+            animation: trophyBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes trophyBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Elimination Modal & Animations */
+        .modal-icon-eliminated {
+            background: rgba(239, 68, 68, 0.2);
+            border: 3px solid var(--danger);
+            color: var(--danger);
+            font-size: 4rem;
+            animation: skullBounce 0.6s ease-in-out 3, glitchEffect 0.8s ease-in-out infinite;
+        }
+
+        @keyframes skullBounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-15deg); }
+            75% { transform: scale(1.2) rotate(15deg); }
+        }
+
+        @keyframes glitchEffect {
+            0%, 100% {
+                transform: translate(0, 0);
+                filter: hue-rotate(0deg);
+            }
+            20% {
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            40% {
+                transform: translate(2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            60% {
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(270deg);
+            }
+            80% {
+                transform: translate(2px, 2px);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .eliminated-avatar {
+            animation: avatarElimination 1s ease-out;
+            filter: grayscale(1);
+        }
+
+        @keyframes avatarElimination {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(0.8) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        .elimination-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--danger);
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+            animation: dangerShake 0.5s ease-in-out 3;
+        }
+
+        @keyframes dangerShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Elimination Particles */
+        .elimination-particle {
+            position: fixed;
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: 9999;
+            animation: particleExplode 1.5s ease-out forwards;
+        }
+
+        @keyframes particleExplode {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* Red Danger Particles */
+        .danger-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: dangerParticleFall 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        @keyframes dangerParticleFall {
+            to {
+                transform: translateY(100vh) translateX(var(--drift)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Glitch Text Effect */
+        .glitch-text {
+            position: relative;
+            animation: textGlitch 0.3s ease-in-out infinite;
+        }
+
+        @keyframes textGlitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Hidden Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-sm);
+            }
+
+            .glass-card {
+                padding: var(--space-md);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .game-info {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.875rem 0.625rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .designer-name {
+                font-size: 1.5rem;
+            }
+
+            .trophy-icon {
+                font-size: 4rem;
+            }
+
+            .avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 3rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .player-name-with-avatar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .winner-score-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 50%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin: var(--space-md) 0;
+            animation: scoreGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes scoreGlow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); }
+            50% { filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.9)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Professional Header -->
+        <header class="header">
+            <h1 class="logo">WIZARD</h1>
+            <p class="tagline">Tournament Score Tracker</p>
+        </header>
+
+        <!-- Setup Section -->
+        <section id="setupSection">
+            <div class="glass-card">
+                <h2 class="section-title">Tournament Setup</h2>
+
+                <div class="grid">
+                    <div class="input-group">
+                        <label class="input-label">Number of Players</label>
+                        <div class="number-spinner number-spinner-large">
+                            <button class="spinner-btn" onclick="changePlayerCount(-1)">−</button>
+                            <input type="number" class="spinner-input" id="numPlayers" min="2" max="6" value="6" readonly>
+                            <button class="spinner-btn" onclick="changePlayerCount(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="schedule-box" id="schedulePreview">
+                    <h3 class="schedule-title">Elimination Schedule</h3>
+                    <p id="scheduleDesc" style="color: var(--text-secondary); margin-bottom: var(--space-sm); font-weight: 500;"></p>
+                    <div class="schedule-items" id="scheduleItems"></div>
+                    <p style="margin-top: var(--space-sm); font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
+                        Target: 3 final players • Maximum 20 rounds
+                    </p>
+                </div>
+
+                <div id="playerNamesContainer" class="grid grid-2"></div>
+
+                <div style="margin-top: var(--space-lg); text-align: center;">
+                    <button class="btn btn-primary" onclick="startGame()">
+                        Start Tournament
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Section -->
+        <section id="gameSection" class="hidden">
+            <!-- Statistics Dashboard -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Current Round</div>
+                    <div class="stat-value"><span id="currentRound">1</span>/<span id="maxRounds">20</span></div>
+                    <div class="stat-subtitle">Progress</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cards Dealt</div>
+                    <div class="stat-value" id="cardsDealt">1</div>
+                    <div class="stat-subtitle">Per Player</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Players</div>
+                    <div class="stat-value" id="activePlayers">6</div>
+                    <div class="stat-subtitle">In Competition</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Eliminated</div>
+                    <div class="stat-value" id="eliminatedCount">0</div>
+                    <div class="stat-subtitle">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Score</div>
+                    <div class="stat-value" id="avgScore">0</div>
+                    <div class="stat-subtitle">Active Players</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Highest Score</div>
+                    <div class="stat-value" id="highScore">0</div>
+                    <div class="stat-subtitle" id="leaderName">Current Leader</div>
+                </div>
+            </div>
+
+            <div class="schedule-box" id="gameScheduleBox">
+                <h3 class="schedule-title">Tournament Status</h3>
+                <p id="gameScheduleDesc" style="color: var(--text-secondary); margin-bottom: var(--space-sm); font-weight: 500;"></p>
+                <div class="next-elimination" id="nextElimination"></div>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Status</th>
+                                <th>Bid</th>
+                                <th>Actual</th>
+                                <th>Round</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gameTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: var(--space-lg);">
+                <button class="btn btn-success" id="calculateBtn" onclick="calculateRound()">
+                    Calculate Round
+                </button>
+                <button class="btn btn-primary" id="nextRoundBtn" onclick="nextRound()" disabled>
+                    Next Round
+                </button>
+                <button class="btn btn-danger" onclick="resetGame()">
+                    New Game
+                </button>
+            </div>
+        </section>
+
+        <!-- Professional Footer -->
+        <footer class="footer">
+            <div class="designer-signature">
+                <span class="designer-label">Designed by</span>
+                <span class="designer-name">S3MAH</span>
+                <span class="designer-title">Crafting pixels, one wizard at a time ✨</span>
+            </div>
+        </footer>
+
+        <!-- Custom Confirmation Modal -->
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal">
+                <div class="modal-icon modal-icon-warning">⚠</div>
+                <h3 class="modal-title">Start New Tournament?</h3>
+                <p class="modal-text">All current progress will be permanently lost. This action cannot be undone.</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button class="modal-btn modal-btn-confirm" onclick="confirmReset()">Start New Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Winner Celebration Modal -->
+        <div class="modal-overlay" id="winnerModal">
+            <div class="modal">
+                <div class="modal-icon modal-icon-success">
+                    <span class="trophy-icon">🏆</span>
+                </div>
+                <h3 class="modal-title" id="winnerTitle">VICTORY!</h3>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-md); margin: var(--space-lg) 0;">
+                    <div id="winnerAvatar"></div>
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.125rem; color: var(--text-secondary); margin-bottom: var(--space-xs);">Tournament Champion</p>
+                        <p id="winnerName" style="font-family: 'Orbitron', monospace; font-size: 1.75rem; font-weight: 900; color: var(--text-primary);"></p>
+                    </div>
+                </div>
+                <div class="winner-score-display" id="winnerScore"></div>
+                <p class="modal-text" id="winnerMessage">Absolute mastery! Your wizard skills are legendary!</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" onclick="closeWinnerModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elimination Modal -->
+        <div class="modal-overlay" id="eliminationModal">
+            <div class="modal">
+                <div class="modal-icon modal-icon-eliminated">
+                    💀
+                </div>
+                <h3 class="elimination-title">ELIMINATED!</h3>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-md); margin: var(--space-lg) 0;">
+                    <div id="eliminatedAvatar"></div>
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.125rem; color: var(--text-secondary); margin-bottom: var(--space-xs);">Player Disconnected</p>
+                        <p id="eliminatedName" style="font-family: 'Orbitron', monospace; font-size: 1.75rem; font-weight: 900; color: var(--danger);"></p>
+                    </div>
+                </div>
+                <div style="font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 700; color: var(--text-muted); text-align: center; margin: var(--space-md) 0;">
+                    Round <span id="eliminatedRound"></span> • Score: <span id="eliminatedScore"></span>
+                </div>
+                <p class="modal-text glitch-text" id="eliminationMessage">Your wizard has left the building 🚪</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" onclick="closeEliminationModal()">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State Management
+        let gameState = {
+            players: [],
+            currentRound: 1,
+            cardsDealt: 1,
+            maxRounds: 20,
+            eliminationSchedule: [],
+            roundCalculated: false
+        };
+
+        // Avatar Color Palettes
+        const avatarGradients = [
+            ['#8B5CF6', '#EC4899'],  // Purple to Pink
+            ['#06B6D4', '#3B82F6'],  // Cyan to Blue
+            ['#F59E0B', '#EF4444'],  // Amber to Red
+            ['#10B981', '#059669'],  // Green to Emerald
+            ['#8B5CF6', '#06B6D4'],  // Purple to Cyan
+            ['#EC4899', '#F59E0B'],  // Pink to Amber
+        ];
+
+        // Funny Elimination Messages
+        const eliminationMessages = [
+            "Mission failed. Better luck next time! 🎯",
+            "Your wizard has left the building 🚪",
+            "The cards have spoken... farewell! 🃏",
+            "Disconnected from the tournament matrix 🔌",
+            "Your journey ends here, brave wizard ⚔️",
+            "The tournament gods have decided 🌩️",
+            "You've been outplayed... literally! 👋",
+            "Time to hang up your wizard hat 🎩",
+            "Not today, champion. Not today. ❌",
+            "The elimination train has no brakes! 🚂"
+        ];
+
+        // Winner celebration messages
+        const winnerMessages = [
+            "Absolute mastery! Your wizard skills are legendary!",
+            "Flawless victory! You've conquered the tournament!",
+            "The prophecy has been fulfilled! Hail the champion!",
+            "Unbelievable! You're the ultimate wizard master!",
+            "Legendary performance! The cards bow to you!",
+            "Supreme excellence! You are the chosen one!",
+            "Perfection achieved! All hail the wizard king/queen!"
+        ];
+
+        // German Tournament Elimination Schedule
+        function generateEliminationSchedule(numPlayers) {
+            const schedule = [];
+            switch(numPlayers) {
+                case 6: schedule.push(10, 12, 15); break;
+                case 5: schedule.push(10, 15); break;
+                case 4: schedule.push(15); break;
+            }
+            return schedule;
+        }
+
+        function getScheduleDescription(numPlayers) {
+            const schedules = {
+                6: "6 players: Eliminate at rounds 10, 12, 15 → Final 3",
+                5: "5 players: Eliminate at rounds 10, 15 → Final 3",
+                4: "4 players: Eliminate at round 15 → Final 3",
+                3: "3 players: No elimination - Play all 20 rounds",
+                2: "2 players: Head-to-head competition"
+            };
+            return schedules[numPlayers] || "";
+        }
+
+        // Generate Avatar
+        function generateAvatar(name, playerIndex) {
+            const initials = name.trim().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const gradient = avatarGradients[playerIndex % avatarGradients.length];
+            return {
+                initials,
+                gradient,
+                style: `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`
+            };
+        }
+
+        function createAvatarHTML(avatar, sizeClass = '') {
+            return `<div class="player-avatar ${sizeClass}" style="${avatar.style}">${avatar.initials}</div>`;
+        }
+
+        function changePlayerCount(delta) {
+            const input = document.getElementById('numPlayers');
+            const currentValue = parseInt(input.value);
+            const newValue = currentValue + delta;
+
+            if (newValue >= 2 && newValue <= 6) {
+                input.value = newValue;
+                updatePlayerNames();
+                updateSchedulePreview();
+            }
+        }
+
+        function updateSchedulePreview() {
+            const numPlayers = parseInt(document.getElementById('numPlayers').value);
+            const schedule = generateEliminationSchedule(numPlayers);
+
+            document.getElementById('scheduleDesc').textContent = getScheduleDescription(numPlayers);
+
+            const container = document.getElementById('scheduleItems');
+            container.innerHTML = '';
+
+            if (schedule.length > 0) {
+                schedule.forEach((round, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'schedule-item';
+                    div.textContent = `Round ${round}: Eliminate 1 player (${numPlayers - idx} → ${numPlayers - idx - 1})`;
+                    container.appendChild(div);
+                });
+            } else {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.style.borderLeftColor = 'var(--success)';
+                div.textContent = 'No eliminations scheduled';
+                container.appendChild(div);
+            }
+        }
+
+        function updatePlayerNames() {
+            const numPlayers = parseInt(document.getElementById('numPlayers').value);
+            const container = document.getElementById('playerNamesContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < numPlayers; i++) {
+                const div = document.createElement('div');
+                div.className = 'input-group';
+                div.innerHTML = `
+                    <label class="input-label">Player ${i + 1}</label>
+                    <input type="text" id="player${i}" class="input-field" placeholder="Player ${i + 1}" value="Player ${i + 1}">
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function calculateScore(bid, actual) {
+            return bid === actual ? 20 + (10 * actual) : -10 * Math.abs(bid - actual);
+        }
+
+        function startGame() {
+            const numPlayers = parseInt(document.getElementById('numPlayers').value);
+
+            const players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                const name = document.getElementById(`player${i}`).value.trim() || `Player ${i + 1}`;
+                players.push({
+                    name,
+                    avatar: generateAvatar(name, i),
+                    totalScore: 0,
+                    eliminated: false,
+                    eliminatedOnRound: null,
+                    rounds: []
+                });
+            }
+
+            gameState = {
+                players,
+                currentRound: 1,
+                cardsDealt: 1,
+                maxRounds: 20,
+                eliminationSchedule: generateEliminationSchedule(numPlayers),
+                roundCalculated: false
+            };
+
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+            document.getElementById('maxRounds').textContent = gameState.maxRounds;
+            document.getElementById('gameScheduleDesc').textContent = getScheduleDescription(numPlayers);
+
+            updateStatistics();
+            updateNextElimination();
+            renderTable();
+        }
+
+        function updateStatistics() {
+            const active = gameState.players.filter(p => !p.eliminated);
+            const eliminated = gameState.players.filter(p => p.eliminated);
+
+            document.getElementById('activePlayers').textContent = active.length;
+            document.getElementById('eliminatedCount').textContent = eliminated.length;
+
+            if (active.length > 0) {
+                const avgScore = Math.round(active.reduce((sum, p) => sum + p.totalScore, 0) / active.length);
+                const highScore = Math.max(...active.map(p => p.totalScore));
+                const leader = active.find(p => p.totalScore === highScore);
+
+                document.getElementById('avgScore').textContent = avgScore;
+                document.getElementById('highScore').textContent = highScore;
+                document.getElementById('leaderName').textContent = leader ? leader.name : 'Current Leader';
+            }
+        }
+
+        function updateNextElimination() {
+            const next = gameState.eliminationSchedule.find(r => r > gameState.currentRound - 1);
+            const el = document.getElementById('nextElimination');
+
+            if (next) {
+                const rounds = next - gameState.currentRound + 1;
+                el.textContent = `Next Elimination: Round ${next} (in ${rounds} ${rounds === 1 ? 'round' : 'rounds'})`;
+            } else if (gameState.players.filter(p => !p.eliminated).length === 3) {
+                el.textContent = 'Final 3 Players - No More Eliminations';
+                el.style.borderColor = 'var(--success)';
+                el.style.color = 'var(--success)';
+                el.style.background = 'rgba(16, 185, 129, 0.1)';
+            } else {
+                el.textContent = 'No more eliminations scheduled';
+            }
+        }
+
+        function isNextRoundElimination() {
+            return gameState.eliminationSchedule.includes(gameState.currentRound + 1);
+        }
+
+        // Create Professional Number Spinner
+        function createNumberSpinner(id, disabled = false) {
+            return `
+                <div class="number-spinner">
+                    <button class="spinner-btn" onclick="decrementValue('${id}')" ${disabled ? 'disabled' : ''}>−</button>
+                    <input type="number" class="spinner-input" id="${id}" min="0" placeholder="0" value="0" ${disabled ? 'disabled' : ''} readonly>
+                    <button class="spinner-btn" onclick="incrementValue('${id}')" ${disabled ? 'disabled' : ''}>+</button>
+                </div>
+            `;
+        }
+
+        function incrementValue(id) {
+            const input = document.getElementById(id);
+            if (!input.disabled) {
+                const currentValue = parseInt(input.value) || 0;
+                input.value = currentValue + 1;
+            }
+        }
+
+        function decrementValue(id) {
+            const input = document.getElementById(id);
+            if (!input.disabled) {
+                const currentValue = parseInt(input.value) || 0;
+                if (currentValue > 0) {
+                    input.value = currentValue - 1;
+                }
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('gameTableBody');
+            tbody.innerHTML = '';
+
+            const sorted = [...gameState.players].sort((a, b) => {
+                if (a.eliminated && !b.eliminated) return 1;
+                if (!a.eliminated && b.eliminated) return -1;
+                return b.totalScore - a.totalScore;
+            });
+
+            const active = gameState.players.filter(p => !p.eliminated);
+            const lowest = active.length > 0 ? Math.min(...active.map(p => p.totalScore)) : 0;
+            const isElimNext = isNextRoundElimination();
+
+            sorted.forEach((player, displayIdx) => {
+                const originalIdx = gameState.players.indexOf(player);
+                const row = document.createElement('tr');
+
+                if (player.eliminated) row.classList.add('eliminated');
+                else if (isWinner(player)) row.classList.add('winner');
+                else if (isElimNext && player.totalScore === lowest && active.length > 3) row.classList.add('danger-zone');
+
+                let rank = player.eliminated ? '✗' : isWinner(player) ? '★' : (displayIdx + 1);
+
+                let badge = '';
+                if (player.eliminated) {
+                    badge = `<span class="badge badge-eliminated">Out R${player.eliminatedOnRound}</span>`;
+                } else if (isWinner(player)) {
+                    badge = '<span class="badge badge-winner">Winner</span>';
+                } else if (isElimNext && player.totalScore === lowest && active.length > 3) {
+                    badge = '<span class="badge badge-danger">At Risk</span>';
+                } else {
+                    badge = '<span class="badge badge-active">Active</span>';
+                }
+
+                const lastRound = player.rounds[player.rounds.length - 1];
+                const roundScore = lastRound ? lastRound.score : 0;
+                const scoreClass = roundScore > 0 ? 'score-positive' : roundScore < 0 ? 'score-negative' : '';
+
+                const isDisabled = player.eliminated || gameState.roundCalculated;
+
+                row.innerHTML = `
+                    <td class="rank-display">${rank}</td>
+                    <td>
+                        <div class="player-name-with-avatar">
+                            ${createAvatarHTML(player.avatar)}
+                            <span style="font-weight: 700;">${player.name}</span>
+                        </div>
+                    </td>
+                    <td>${badge}</td>
+                    <td>${createNumberSpinner('bid' + originalIdx, isDisabled)}</td>
+                    <td>${createNumberSpinner('actual' + originalIdx, isDisabled)}</td>
+                    <td><span class="score ${scoreClass}" id="roundScore${originalIdx}">${lastRound ? (roundScore >= 0 ? '+' : '') + roundScore : '—'}</span></td>
+                    <td><span class="score ${player.totalScore >= 0 ? 'score-positive' : 'score-negative'}">${player.totalScore}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('currentRound').textContent = gameState.currentRound;
+            document.getElementById('cardsDealt').textContent = gameState.cardsDealt;
+        }
+
+        function calculateRound() {
+            const active = gameState.players.filter(p => !p.eliminated);
+            let valid = true;
+
+            active.forEach(player => {
+                const idx = gameState.players.indexOf(player);
+                const bid = parseInt(document.getElementById(`bid${idx}`).value);
+                const actual = parseInt(document.getElementById(`actual${idx}`).value);
+
+                if (isNaN(bid) || isNaN(actual) || bid < 0 || actual < 0) {
+                    valid = false;
+                    return;
+                }
+            });
+
+            if (!valid) {
+                showAlert('Please enter valid bids and actuals for all active players', 'warning');
+                return;
+            }
+
+            active.forEach(player => {
+                const idx = gameState.players.indexOf(player);
+                const bid = parseInt(document.getElementById(`bid${idx}`).value);
+                const actual = parseInt(document.getElementById(`actual${idx}`).value);
+                const score = calculateScore(bid, actual);
+
+                player.rounds.push({ bid, actual, score });
+                player.totalScore += score;
+
+                const scoreClass = score > 0 ? 'score-positive' : score < 0 ? 'score-negative' : '';
+                document.getElementById(`roundScore${idx}`).textContent = (score >= 0 ? '+' : '') + score;
+                document.getElementById(`roundScore${idx}`).className = `score ${scoreClass}`;
+            });
+
+            gameState.roundCalculated = true;
+            document.getElementById('calculateBtn').disabled = true;
+            document.getElementById('nextRoundBtn').disabled = false;
+
+            updateStatistics();
+            renderTable();
+            showAlert('Round calculated successfully', 'success');
+        }
+
+        function nextRound() {
+            if (gameState.eliminationSchedule.includes(gameState.currentRound)) {
+                eliminatePlayer();
+            }
+
+            const active = gameState.players.filter(p => !p.eliminated);
+
+            if (active.length === 1 || gameState.currentRound >= gameState.maxRounds) {
+                showWinnerCelebration();
+                return;
+            }
+
+            gameState.currentRound++;
+            gameState.cardsDealt++;
+            gameState.roundCalculated = false;
+
+            document.getElementById('calculateBtn').disabled = false;
+            document.getElementById('nextRoundBtn').disabled = true;
+
+            updateStatistics();
+            updateNextElimination();
+            renderTable();
+            showAlert(`Round ${gameState.currentRound} - ${gameState.cardsDealt} cards dealt`, 'info');
+        }
+
+        function eliminatePlayer() {
+            const active = gameState.players.filter(p => !p.eliminated);
+
+            if (active.length <= 3) {
+                showAlert('Final 3 players reached', 'info');
+                return;
+            }
+
+            const lowest = Math.min(...active.map(p => p.totalScore));
+            const toEliminate = active.filter(p => p.totalScore === lowest);
+
+            if (toEliminate.length === active.length) {
+                showAlert('All players tied - no elimination', 'warning');
+                return;
+            }
+
+            const eliminated = toEliminate[0];
+            eliminated.eliminated = true;
+            eliminated.eliminatedOnRound = gameState.currentRound;
+
+            // Show elimination modal with animations
+            showEliminationAnimation(eliminated);
+            updateStatistics();
+        }
+
+        function showEliminationAnimation(player) {
+            // Set elimination details
+            document.getElementById('eliminatedName').textContent = player.name;
+            document.getElementById('eliminatedRound').textContent = player.eliminatedOnRound;
+            document.getElementById('eliminatedScore').textContent = player.totalScore;
+            document.getElementById('eliminatedAvatar').innerHTML = createAvatarHTML(player.avatar, 'avatar-large eliminated-avatar');
+
+            // Random funny message
+            const funnyMessage = eliminationMessages[Math.floor(Math.random() * eliminationMessages.length)];
+            document.getElementById('eliminationMessage').textContent = funnyMessage;
+
+            // Show modal
+            document.getElementById('eliminationModal').classList.add('active');
+
+            // Launch danger particles
+            launchEliminationParticles();
+        }
+
+        function launchEliminationParticles() {
+            // Emoji explosion particles
+            const emojis = ['💀', '⚡', '💥', '🔥', '☠️', '❌'];
+
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'elimination-particle';
+                    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    particle.style.left = '50%';
+                    particle.style.top = '50%';
+
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const distance = 200 + Math.random() * 200;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+
+                    particle.style.setProperty('--tx', tx + 'px');
+                    particle.style.setProperty('--ty', ty + 'px');
+
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => particle.remove(), 1500);
+                }, i * 30);
+            }
+
+            // Red danger particles falling
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'danger-particle';
+                    particle.style.left = Math.random() * 100 + 'vw';
+                    particle.style.top = '-20px';
+                    particle.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
+
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => particle.remove(), 2000);
+                }, i * 40);
+            }
+        }
+
+        function closeEliminationModal() {
+            document.getElementById('eliminationModal').classList.remove('active');
+        }
+
+        function isWinner(player) {
+            const active = gameState.players.filter(p => !p.eliminated);
+            if (active.length === 1 && active[0] === player) return true;
+            if (gameState.currentRound >= gameState.maxRounds && active.length > 1) {
+                return active.sort((a, b) => b.totalScore - a.totalScore)[0] === player;
+            }
+            return false;
+        }
+
+        function showWinnerCelebration() {
+            const active = gameState.players.filter(p => !p.eliminated);
+            const winner = active.sort((a, b) => b.totalScore - a.totalScore)[0];
+
+            document.getElementById('nextRoundBtn').disabled = true;
+            document.getElementById('calculateBtn').disabled = true;
+
+            // Set winner details
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerScore').textContent = `${winner.totalScore} Points`;
+            document.getElementById('winnerAvatar').innerHTML = createAvatarHTML(winner.avatar, 'avatar-large');
+
+            const randomMessage = winnerMessages[Math.floor(Math.random() * winnerMessages.length)];
+            document.getElementById('winnerMessage').textContent = randomMessage;
+
+            // Show modal
+            document.getElementById('winnerModal').classList.add('active');
+
+            // Launch confetti
+            launchConfetti();
+
+            updateStatistics();
+            renderTable();
+        }
+
+        function launchConfetti() {
+            const colors = ['#8B5CF6', '#06B6D4', '#EC4899', '#F59E0B', '#10B981', '#EF4444'];
+
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3500);
+                }, i * 30);
+            }
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').classList.remove('active');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+
+            if (type === 'info' || type === 'success') {
+                setTimeout(() => alert.remove(), 5000);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function confirmReset() {
+            closeModal();
+            document.getElementById('setupSection').classList.remove('hidden');
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        // Close modal on overlay click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+                closeWinnerModal();
+                closeEliminationModal();
+            }
+        });
+
+        window.onload = function() {
+            updatePlayerNames();
+            updateSchedulePreview();
+        };
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('[PWA] Service Worker registered successfully:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (confirm('New version available! Reload to update?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.log('[PWA] Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Installation Prompt
+        let deferredPrompt;
+        let installButton;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('[PWA] Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Create install button if not exists
+            if (!installButton) {
+                installButton = document.createElement('button');
+                installButton.className = 'btn btn-primary';
+                installButton.innerHTML = '📱 Install App';
+                installButton.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6);';
+                installButton.onclick = async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`[PWA] User response: ${outcome}`);
+
+                        if (outcome === 'accepted') {
+                            installButton.remove();
+                        }
+                        deferredPrompt = null;
+                    }
+                };
+                document.body.appendChild(installButton);
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App installed successfully');
+            if (installButton) {
+                installButton.remove();
+            }
+            showAlert('App installed! You can now use it offline.', 'success');
+        });
+
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            showAlert('Back online!', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            showAlert('You are offline. Some features may be limited.', 'warning');
+        });
+    </script>
+</body>
+</html>

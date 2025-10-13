@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Guide - Wizard Tournament</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1a1a3e 50%, #0F172A 100%);
+            color: #F1F5F9;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #CBD5E1;
+            font-size: 1.125rem;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.75rem;
+            color: #8B5CF6;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #8B5CF6, #06B6D4);
+            border-radius: 10px;
+        }
+
+        h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.25rem;
+            color: #06B6D4;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .platform-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid #8B5CF6;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .step {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid #8B5CF6;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .step:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: translateX(6px);
+            border-left-color: #06B6D4;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            margin-right: 0.75rem;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #F59E0B;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            color: #FCD34D;
+        }
+
+        .note-title {
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: #F59E0B;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10B981;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            color: #6EE7B7;
+        }
+
+        .success-title {
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: #10B981;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+            color: #CBD5E1;
+        }
+
+        code {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            color: #A78BFA;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(139, 92, 246, 0.3);
+            color: #94A3B8;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Installation Guide</h1>
+        <p class="subtitle">Install Wizard Tournament on your mobile device for the best experience</p>
+
+        <div class="note">
+            <div class="note-title">⚡ Why Install?</div>
+            <ul>
+                <li><strong>Offline Access:</strong> Play tournaments without internet connection</li>
+                <li><strong>Native Experience:</strong> Full-screen app without browser UI</li>
+                <li><strong>Quick Access:</strong> Launch directly from your home screen</li>
+                <li><strong>Better Performance:</strong> Optimized caching for faster loading</li>
+                <li><strong>Push Notifications:</strong> Get tournament updates (coming soon)</li>
+            </ul>
+        </div>
+
+        <h2><span class="platform-badge">🤖</span> Android Installation</h2>
+
+        <h3>Method 1: Chrome Browser (Recommended)</h3>
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Open the app in Chrome:</strong> Navigate to your hosted Wizard Tournament URL
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Look for install prompt:</strong> A "Install App" button will appear at the bottom-right corner, or you'll see a banner at the top
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Tap "Install App":</strong> Click the floating button or tap "Add to Home screen" in the banner
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Confirm installation:</strong> Tap "Install" in the confirmation dialog
+        </div>
+
+        <h3>Method 2: Manual Installation (Chrome)</h3>
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Open Chrome menu:</strong> Tap the three dots (⋮) in the top-right corner
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Select "Add to Home screen":</strong> Find this option in the menu
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Name the app:</strong> The default name "Wizard" will appear - tap "Add"
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Find the icon:</strong> Look for the Wizard Tournament icon on your home screen
+        </div>
+
+        <h3>Method 3: Firefox Browser</h3>
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Open menu:</strong> Tap the three dots (⋮) at the top-right
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Select "Install":</strong> Look for the install option with a phone icon
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Confirm:</strong> Tap "Add" to install
+        </div>
+
+        <h2><span class="platform-badge">🍎</span> iOS Installation (iPhone/iPad)</h2>
+
+        <h3>Safari Browser (iOS 16.3+)</h3>
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Open in Safari:</strong> Make sure you're using Safari browser (PWAs only work in Safari on iOS)
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Tap the Share button:</strong> Look for the square with an arrow pointing up (⬆️) at the bottom of the screen
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Scroll and find "Add to Home Screen":</strong> It may be in the second row of options
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Customize name (optional):</strong> The app name "Wizard" will appear - you can edit it or keep it
+        </div>
+        <div class="step">
+            <span class="step-number">5</span>
+            <strong>Tap "Add":</strong> Confirm the installation by tapping "Add" in the top-right
+        </div>
+        <div class="step">
+            <span class="step-number">6</span>
+            <strong>Find on Home Screen:</strong> The app icon will appear on your home screen
+        </div>
+
+        <div class="note">
+            <div class="note-title">📌 iOS Important Notes:</div>
+            <ul>
+                <li><strong>Safari Only:</strong> PWA installation only works in Safari browser on iOS</li>
+                <li><strong>iOS 16.3+:</strong> Requires iOS 16.3 or later for full PWA support</li>
+                <li><strong>Web App Mode:</strong> When launched, the app runs in full-screen mode without Safari UI</li>
+                <li><strong>No Chrome/Firefox:</strong> Other browsers on iOS cannot install PWAs</li>
+            </ul>
+        </div>
+
+        <h2><span class="icon">💻</span> Desktop Installation</h2>
+
+        <h3>Chrome, Edge, or Brave (Desktop)</h3>
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Open the app:</strong> Navigate to the Wizard Tournament URL
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Look for install icon:</strong> You'll see a computer icon (⊕) in the address bar
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Click install:</strong> Click the icon and then "Install"
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Launch:</strong> The app will open in its own window and appear in your applications
+        </div>
+
+        <h2><span class="icon">✅</span> Verifying Installation</h2>
+
+        <div class="success">
+            <div class="success-title">✨ Installation Successful!</div>
+            <p>You'll know the installation worked when you see:</p>
+            <ul>
+                <li>A <strong>Wizard Tournament icon</strong> with the purple/cyan "W" logo on your home screen</li>
+                <li>The app opens in <strong>full-screen mode</strong> without browser address bar</li>
+                <li>The app appears in your <strong>recent apps</strong> list</li>
+                <li>You can use the app <strong>offline</strong> after first load</li>
+            </ul>
+        </div>
+
+        <h2><span class="icon">🔧</span> Troubleshooting</h2>
+
+        <h3>Install option not showing?</h3>
+        <ul>
+            <li><strong>Check HTTPS:</strong> The site must be served over HTTPS (not HTTP)</li>
+            <li><strong>Wait for service worker:</strong> Wait 5-10 seconds after page load</li>
+            <li><strong>Try different browser:</strong> Use Chrome on Android or Safari on iOS</li>
+            <li><strong>Clear cache:</strong> Clear browser cache and reload the page</li>
+        </ul>
+
+        <h3>App not working offline?</h3>
+        <ul>
+            <li><strong>Load once online:</strong> You must load the app at least once with internet</li>
+            <li><strong>Wait for caching:</strong> Service worker needs time to cache resources</li>
+            <li><strong>Check console:</strong> Open developer tools to see service worker status</li>
+        </ul>
+
+        <h3>How to update the app?</h3>
+        <ul>
+            <li><strong>Automatic updates:</strong> The app checks for updates automatically</li>
+            <li><strong>Update prompt:</strong> You'll see "New version available! Reload to update?"</li>
+            <li><strong>Manual update:</strong> Close and reopen the app to check for updates</li>
+        </ul>
+
+        <h3>How to uninstall?</h3>
+        <ul>
+            <li><strong>Android:</strong> Long-press the app icon → "Uninstall" or "Remove"</li>
+            <li><strong>iOS:</strong> Long-press the app icon → "Remove App" → "Delete App"</li>
+            <li><strong>Desktop:</strong> Right-click app icon → "Uninstall" or go to system settings</li>
+        </ul>
+
+        <h2><span class="icon">🎮</span> Using the App</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Launch the app:</strong> Tap the Wizard Tournament icon on your home screen
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Set up players:</strong> Enter 2-6 players and their names
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Start tournament:</strong> Begin tracking scores with the German elimination system
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Works offline:</strong> Continue playing even without internet connection
+        </div>
+
+        <h2><span class="icon">📋</span> System Requirements</h2>
+
+        <ul>
+            <li><strong>Android:</strong> Android 5.0+ with Chrome 45+, Firefox 58+, or Samsung Internet 5.0+</li>
+            <li><strong>iOS:</strong> iOS 16.3+ with Safari (PWAs not supported on earlier versions)</li>
+            <li><strong>Desktop:</strong> Chrome 73+, Edge 79+, Brave, or Opera 60+</li>
+            <li><strong>Internet:</strong> Required for first install, then works offline</li>
+            <li><strong>Storage:</strong> Approximately 2-5 MB of device storage</li>
+        </ul>
+
+        <div class="note">
+            <div class="note-title">💡 Pro Tips</div>
+            <ul>
+                <li>Install on all your devices for seamless tournament tracking</li>
+                <li>The app works great on tablets for larger tournaments</li>
+                <li>Use landscape mode for better table visibility</li>
+                <li>All game data is stored locally on your device</li>
+                <li>The app stays logged in - no accounts needed!</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <div class="footer-logo">WIZARD TOURNAMENT</div>
+            <p style="margin-top: 1rem;">Professional Score Tracker • PWA Edition</p>
+            <p style="margin-top: 0.5rem;">Designed by S3MAH ✨</p>
+        </div>
+    </div>
+</body>
+</html>
