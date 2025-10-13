@@ -2228,6 +2228,7 @@
         window.onload = function() {
             updatePlayerNames();
             updateSchedulePreview();
+            createInstallButton();  // Show permanent install button
         };
 
         // PWA Service Worker Registration
@@ -2260,31 +2261,119 @@
         let deferredPrompt;
         let installButton;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('[PWA] Install prompt available');
-            e.preventDefault();
-            deferredPrompt = e;
-
-            // Create install button if not exists
-            if (!installButton) {
+        // Create PERMANENT install button (always visible)
+        function createInstallButton() {
+            if (!installButton && !window.matchMedia('(display-mode: standalone)').matches) {
                 installButton = document.createElement('button');
                 installButton.className = 'btn btn-primary';
-                installButton.innerHTML = '📱 Install App';
-                installButton.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6);';
+                installButton.innerHTML = '📱 Install';
+                installButton.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 10000; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6); animation: pulse 2s ease-in-out infinite;';
                 installButton.onclick = async () => {
                     if (deferredPrompt) {
+                        // Auto install available
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
                         console.log(`[PWA] User response: ${outcome}`);
 
                         if (outcome === 'accepted') {
                             installButton.remove();
+                            showAlert('App installed successfully! 🎉', 'success');
                         }
                         deferredPrompt = null;
+                    } else {
+                        // Show manual installation instructions
+                        showInstallInstructions();
                     }
                 };
                 document.body.appendChild(installButton);
             }
+        }
+
+        // Show install instructions modal
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            let instructions = '';
+            let title = '';
+
+            if (isIOS) {
+                title = '📱 Install on iPhone/iPad';
+                instructions = `
+                    <div style="text-align: left; padding: 1rem;">
+                        <p style="margin-bottom: 1rem; color: var(--warning); font-weight: 700;">⚠️ You MUST use Safari browser!</p>
+                        <ol style="line-height: 2; padding-left: 1.5rem;">
+                            <li>Tap the <strong>Share button</strong> <span style="font-size: 1.5rem;">⬆️</span> at the bottom</li>
+                            <li>Scroll and tap <strong>"Add to Home Screen"</strong></li>
+                            <li>Tap <strong>"Add"</strong> in top-right corner</li>
+                            <li>The app icon appears on your home screen!</li>
+                        </ol>
+                        <p style="margin-top: 1rem; color: var(--text-tertiary); font-size: 0.875rem;">
+                            Note: Other browsers (Chrome, Firefox) cannot install PWAs on iOS.
+                        </p>
+                    </div>
+                `;
+            } else if (isAndroid) {
+                title = '📱 Install on Android';
+                instructions = `
+                    <div style="text-align: left; padding: 1rem;">
+                        <p style="margin-bottom: 1rem; color: var(--secondary); font-weight: 700;">Using Chrome browser:</p>
+                        <ol style="line-height: 2; padding-left: 1.5rem;">
+                            <li>Tap the <strong>three dots menu</strong> <span style="font-size: 1.5rem;">⋮</span> (top-right)</li>
+                            <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></li>
+                            <li>Tap <strong>"Add"</strong> or <strong>"Install"</strong></li>
+                            <li>The app icon appears on your home screen!</li>
+                        </ol>
+                        <p style="margin-top: 1rem; color: var(--text-tertiary); font-size: 0.875rem;">
+                            Works in Chrome, Firefox, Samsung Internet, and Edge browsers.
+                        </p>
+                    </div>
+                `;
+            } else {
+                title = '💻 Install on Desktop';
+                instructions = `
+                    <div style="text-align: left; padding: 1rem;">
+                        <ol style="line-height: 2; padding-left: 1.5rem;">
+                            <li>Look for the <strong>install icon</strong> <span style="font-size: 1.5rem;">⊕</span> in the address bar</li>
+                            <li>Click it and select <strong>"Install"</strong></li>
+                            <li>The app opens in its own window!</li>
+                        </ol>
+                        <p style="margin-top: 1rem; color: var(--text-tertiary); font-size: 0.875rem;">
+                            Works in Chrome, Edge, Brave, and Opera browsers.
+                        </p>
+                    </div>
+                `;
+            }
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-icon" style="background: rgba(139, 92, 246, 0.2); border: 3px solid var(--primary); color: var(--primary); font-size: 3rem;">
+                        📱
+                    </div>
+                    <h3 class="modal-title" style="font-size: 1.5rem;">${title}</h3>
+                    ${instructions}
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-primary" onclick="this.closest('.modal-overlay').remove()">Got it!</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Close on overlay click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('[PWA] Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
         });
 
         window.addEventListener('appinstalled', () => {
