@@ -1452,7 +1452,7 @@
                     <p id="scheduleDesc" style="color: var(--text-secondary); margin-bottom: var(--space-sm); font-weight: 500;"></p>
                     <div class="schedule-items" id="scheduleItems"></div>
                     <p style="margin-top: var(--space-sm); font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
-                        ⚡ Smart System: Eliminates lowest-scoring players when deck runs out (60 cards) • Target: Final 3 players
+                        🎯 Tournament Rules: ALL players play 20 rounds • Lowest scorer eliminated at fixed rounds • Final 3 play to round 20
                     </p>
                 </div>
 
@@ -1953,52 +1953,52 @@
             "Perfection achieved! All hail the wizard king/queen!"
         ];
 
-        // Card-Based Elimination Schedule (Smart System)
-        // Standard Wizard deck = 60 cards
-        // Each round R deals R cards per active player
-        // Eliminate when: (active_players × next_round) > 60
+        // FIXED Round Elimination Schedule (Tournament Style)
+        // ALL players play all 20 rounds
+        // Eliminate by SCORE at fixed rounds
+        // Always end with 3 final players
         function generateEliminationSchedule(numPlayers) {
-            const DECK_SIZE = 60;
             const schedule = [];
-            let activePlayers = numPlayers;
 
-            // Calculate when eliminations must occur based on deck constraints
-            for (let round = 1; round <= 60; round++) {
-                const nextRoundCards = activePlayers * (round + 1);
-
-                // If next round would exceed deck size, eliminate after current round
-                // STOP at 3 final players (tournament rule - like original 6-player game)
-                if (nextRoundCards > DECK_SIZE && activePlayers > 3) {
-                    schedule.push(round);
-                    activePlayers--;
-                }
-
-                // Stop when down to final 3 players
-                if (activePlayers <= 3) {
+            // Fixed elimination rounds based on player count
+            // Pattern: Eliminate player-by-player until 3 remain
+            switch(numPlayers) {
+                case 9:
+                    schedule.push(5, 7, 9, 11, 13, 15); // 6 eliminations: 9→3
                     break;
-                }
+                case 8:
+                    schedule.push(6, 8, 10, 12, 14); // 5 eliminations: 8→3
+                    break;
+                case 7:
+                    schedule.push(7, 9, 12, 15); // 4 eliminations: 7→3
+                    break;
+                case 6:
+                    schedule.push(10, 12, 15); // 3 eliminations: 6→3 (ORIGINAL)
+                    break;
+                case 5:
+                    schedule.push(10, 15); // 2 eliminations: 5→3
+                    break;
+                case 4:
+                    schedule.push(15); // 1 elimination: 4→3
+                    break;
+                // 3 or fewer: no eliminations
             }
 
             return schedule;
         }
 
-        // Calculate maximum sustainable round for given player count
-        // Cap at 20 rounds maximum (standard Wizard game)
+        // All games play 20 rounds (standard Wizard)
         function calculateMaxRound(numPlayers) {
-            const maxByCards = Math.floor(60 / numPlayers);
-            return Math.min(maxByCards, 20); // Never exceed 20 rounds
+            return 20; // ALWAYS 20 rounds
         }
 
         function getScheduleDescription(numPlayers) {
-            const maxRound = calculateMaxRound(numPlayers);
             const schedule = generateEliminationSchedule(numPlayers);
 
             if (numPlayers <= 3) {
-                return `${numPlayers} players: Play up to ${maxRound} rounds • No eliminations (Final ${numPlayers})`;
-            } else if (schedule.length === 0) {
-                return `${numPlayers} players: Play up to ${maxRound} rounds • No eliminations needed`;
+                return `${numPlayers} players: Play all 20 rounds • No eliminations`;
             } else {
-                return `${numPlayers} players: Smart elimination based on 60-card deck • Target: Final 3 players`;
+                return `${numPlayers} players: Eliminate at fixed rounds → Final 3 players play to round 20`;
             }
         }
 
@@ -2046,26 +2046,22 @@
                 schedule.forEach((round, idx) => {
                     const div = document.createElement('div');
                     div.className = 'schedule-item';
-                    const cardsUsed = currentPlayers * round;
-                    const nextRoundWouldNeed = currentPlayers * (round + 1);
-                    div.textContent = `After Round ${round}: Eliminate 1 player (${currentPlayers} → ${currentPlayers - 1}) • ${cardsUsed} cards used, next round needs ${nextRoundWouldNeed}`;
+                    div.textContent = `Round ${round}: Eliminate lowest scorer (${currentPlayers} → ${currentPlayers - 1} players)`;
                     container.appendChild(div);
                     currentPlayers--;
                 });
 
                 // Show final round info
-                const maxRound = calculateMaxRound(currentPlayers);
                 const finalDiv = document.createElement('div');
                 finalDiv.className = 'schedule-item';
                 finalDiv.style.borderLeftColor = 'var(--success)';
-                finalDiv.textContent = `Final ${currentPlayers} players: Play up to round ${maxRound}`;
+                finalDiv.textContent = `Final 3 players: Continue playing rounds ${schedule[schedule.length - 1] + 1}-20`;
                 container.appendChild(finalDiv);
             } else {
                 const div = document.createElement('div');
                 div.className = 'schedule-item';
                 div.style.borderLeftColor = 'var(--success)';
-                const maxRound = calculateMaxRound(numPlayers);
-                div.textContent = `No eliminations needed • Can play up to ${maxRound} rounds`;
+                div.textContent = `${numPlayers} players: Play all 20 rounds • No eliminations`;
                 container.appendChild(div);
             }
         }
@@ -2113,15 +2109,14 @@
                 players,
                 currentRound: 1,
                 cardsDealt: 1,
-                maxRounds: 60,  // Theoretical maximum, will be limited by deck size
+                maxRounds: 20,  // ALL games play 20 rounds
                 eliminationSchedule: generateEliminationSchedule(numPlayers),
                 roundCalculated: false
             };
 
             document.getElementById('setupSection').classList.add('hidden');
             document.getElementById('gameSection').classList.remove('hidden');
-            const maxPlayableRound = calculateMaxRound(numPlayers);
-            document.getElementById('maxRounds').textContent = maxPlayableRound;
+            document.getElementById('maxRounds').textContent = 20;  // Always 20 rounds
             document.getElementById('gameScheduleDesc').textContent = getScheduleDescription(numPlayers);
 
             updateStatistics();
@@ -2154,8 +2149,7 @@
 
             if (next) {
                 const rounds = next - gameState.currentRound + 1;
-                const cardsNeeded = activePlayers * (next + 1);
-                el.textContent = `⚠️ Next Elimination: After Round ${next} (in ${rounds} ${rounds === 1 ? 'round' : 'rounds'}) • Deck constraint: ${cardsNeeded} cards > 60`;
+                el.textContent = `⚠️ Next Elimination: Round ${next} (in ${rounds} ${rounds === 1 ? 'round' : 'rounds'}) • Lowest scorer will be eliminated`;
                 el.style.borderColor = 'var(--danger)';
                 el.style.color = 'var(--danger)';
                 el.style.background = 'rgba(239, 68, 68, 0.1)';
@@ -2165,8 +2159,7 @@
                 el.style.color = 'var(--success)';
                 el.style.background = 'rgba(16, 185, 129, 0.1)';
             } else {
-                const maxRound = calculateMaxRound(activePlayers);
-                el.textContent = `✓ Enough cards for ${maxRound - gameState.currentRound + 1} more rounds with ${activePlayers} players`;
+                el.textContent = `✓ No more eliminations • ${activePlayers} players continue to round 20`;
                 el.style.borderColor = 'var(--secondary)';
                 el.style.color = 'var(--secondary)';
                 el.style.background = 'rgba(6, 182, 212, 0.1)';
@@ -2329,10 +2322,9 @@
             }
 
             const active = gameState.players.filter(p => !p.eliminated);
-            const maxPlayableRound = calculateMaxRound(active.length);
 
-            // Check if game should end (only 1 player left OR reached max playable rounds)
-            if (active.length === 1 || gameState.currentRound >= maxPlayableRound) {
+            // Check if game should end - ALWAYS play 20 rounds OR only 1 player left
+            if (active.length === 1 || gameState.currentRound >= 20) {
                 showWinnerCelebration();
                 return;
             }
@@ -2345,9 +2337,6 @@
 
             document.getElementById('calculateBtn').disabled = false;
             document.getElementById('nextRoundBtn').disabled = true;
-
-            // Update max rounds display for current player count
-            document.getElementById('maxRounds').textContent = calculateMaxRound(active.length);
 
             updateStatistics();
             updateNextElimination();
@@ -2451,8 +2440,8 @@
             const active = gameState.players.filter(p => !p.eliminated);
             if (active.length === 1 && active[0] === player) return true;
 
-            const maxPlayableRound = calculateMaxRound(active.length);
-            if (gameState.currentRound >= maxPlayableRound && active.length > 1) {
+            // Game ends at round 20 - highest scorer wins
+            if (gameState.currentRound >= 20 && active.length > 1) {
                 return active.sort((a, b) => b.totalScore - a.totalScore)[0] === player;
             }
             return false;
@@ -2599,7 +2588,7 @@
                 players: [],
                 currentRound: 1,
                 cardsDealt: 1,
-                maxRounds: 60,
+                maxRounds: 20,  // ALL games play 20 rounds
                 eliminationSchedule: [],
                 roundCalculated: false
             };
