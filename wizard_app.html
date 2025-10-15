@@ -1452,7 +1452,7 @@
                     <p id="scheduleDesc" style="color: var(--text-secondary); margin-bottom: var(--space-sm); font-weight: 500;"></p>
                     <div class="schedule-items" id="scheduleItems"></div>
                     <p style="margin-top: var(--space-sm); font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
-                        ⚡ Smart System: Eliminates lowest-scoring players when deck runs out (60 cards) • Target: Final 2 players
+                        ⚡ Smart System: Eliminates lowest-scoring players when deck runs out (60 cards) • Target: Final 3 players
                     </p>
                 </div>
 
@@ -1967,13 +1967,14 @@
                 const nextRoundCards = activePlayers * (round + 1);
 
                 // If next round would exceed deck size, eliminate after current round
-                if (nextRoundCards > DECK_SIZE && activePlayers > 2) {
+                // STOP at 3 final players (tournament rule - like original 6-player game)
+                if (nextRoundCards > DECK_SIZE && activePlayers > 3) {
                     schedule.push(round);
                     activePlayers--;
                 }
 
-                // Stop when down to final 2 players
-                if (activePlayers <= 2) {
+                // Stop when down to final 3 players
+                if (activePlayers <= 3) {
                     break;
                 }
             }
@@ -1982,20 +1983,22 @@
         }
 
         // Calculate maximum sustainable round for given player count
+        // Cap at 20 rounds maximum (standard Wizard game)
         function calculateMaxRound(numPlayers) {
-            return Math.floor(60 / numPlayers);
+            const maxByCards = Math.floor(60 / numPlayers);
+            return Math.min(maxByCards, 20); // Never exceed 20 rounds
         }
 
         function getScheduleDescription(numPlayers) {
             const maxRound = calculateMaxRound(numPlayers);
             const schedule = generateEliminationSchedule(numPlayers);
 
-            if (numPlayers === 2) {
-                return `2 players: Play up to ${maxRound} rounds • No eliminations`;
+            if (numPlayers <= 3) {
+                return `${numPlayers} players: Play up to ${maxRound} rounds • No eliminations (Final ${numPlayers})`;
             } else if (schedule.length === 0) {
                 return `${numPlayers} players: Play up to ${maxRound} rounds • No eliminations needed`;
             } else {
-                return `${numPlayers} players: Smart elimination based on 60-card deck • Max ${maxRound} rounds per player count`;
+                return `${numPlayers} players: Smart elimination based on 60-card deck • Target: Final 3 players`;
             }
         }
 
@@ -2156,8 +2159,8 @@
                 el.style.borderColor = 'var(--danger)';
                 el.style.color = 'var(--danger)';
                 el.style.background = 'rgba(239, 68, 68, 0.1)';
-            } else if (activePlayers === 2) {
-                el.textContent = '🏆 Final 2 Players - Battle to the End!';
+            } else if (activePlayers === 3) {
+                el.textContent = '🏆 Final 3 Players - Play to Round 20!';
                 el.style.borderColor = 'var(--success)';
                 el.style.color = 'var(--success)';
                 el.style.background = 'rgba(16, 185, 129, 0.1)';
@@ -2227,7 +2230,7 @@
 
                 if (player.eliminated) row.classList.add('eliminated');
                 else if (isWinner(player)) row.classList.add('winner');
-                else if (isElimNext && player.totalScore === lowest && active.length > 2) row.classList.add('danger-zone');
+                else if (isElimNext && player.totalScore === lowest && active.length > 3) row.classList.add('danger-zone');
 
                 let rank = player.eliminated ? '✗' : isWinner(player) ? '★' : (displayIdx + 1);
 
@@ -2236,7 +2239,7 @@
                     badge = `<span class="badge badge-eliminated">Out R${player.eliminatedOnRound}</span>`;
                 } else if (isWinner(player)) {
                     badge = '<span class="badge badge-winner">Winner</span>';
-                } else if (isElimNext && player.totalScore === lowest && active.length > 2) {
+                } else if (isElimNext && player.totalScore === lowest && active.length > 3) {
                     badge = '<span class="badge badge-danger">At Risk</span>';
                 } else {
                     badge = '<span class="badge badge-active">Active</span>';
@@ -2355,8 +2358,8 @@
         function eliminatePlayer() {
             const active = gameState.players.filter(p => !p.eliminated);
 
-            if (active.length <= 2) {
-                showAlert('🏆 Final 2 players reached! Battle to the end!', 'info');
+            if (active.length <= 3) {
+                showAlert('🏆 Final 3 players reached! Play to round 20!', 'info');
                 return;
             }
 
