@@ -3142,12 +3142,7 @@
             const lowest = Math.min(...active.map(p => p.totalScore));
             const toEliminate = active.filter(p => p.totalScore === lowest);
 
-            if (toEliminate.length === active.length) {
-                showAlert('All players tied - no elimination', 'warning');
-                return;
-            }
-
-            // ⚔️ TIE-BREAKER: If multiple players tied for lowest, trigger DUEL!
+            // TIE-BREAKER: If multiple players tied (even if ALL tied), trigger DUEL!
             if (toEliminate.length > 1) {
                 initiateDuel(toEliminate);
                 return;
