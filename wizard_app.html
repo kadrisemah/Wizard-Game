@@ -1421,90 +1421,97 @@
             50% { filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.9)); }
         }
 
-        /* Wizard's Duel Tie-Breaker System */
+        /* Professional Duel Tie-Breaker System */
         .duel-container {
             display: flex;
             flex-direction: column;
-            gap: var(--space-xl);
-            margin: var(--space-xl) 0;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         .duel-players {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: var(--space-xl);
+            align-items: flex-start;
+            gap: 1rem;
             flex-wrap: wrap;
+            padding: 0.5rem;
         }
 
         .duel-player {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: var(--space-md);
-            padding: var(--space-lg);
+            gap: 0.5rem;
+            padding: 0.75rem;
             background: rgba(15, 23, 42, 0.6);
             border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: var(--radius-lg);
-            min-width: 200px;
-            transition: all 0.3s;
+            border-radius: var(--radius-md);
+            min-width: 120px;
+            max-width: 150px;
+            transition: all 0.4s;
         }
 
-        .duel-player.winner {
+        .duel-player.survivor {
             border-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
         }
 
-        .duel-player.loser {
+        .duel-player.eliminated {
             border-color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-            opacity: 0.5;
-            transform: scale(0.95);
+            background: rgba(239, 68, 68, 0.15);
+            opacity: 0.6;
+        }
+
+        .duel-player-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .duel-player-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .duel-player-score {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .duel-card {
-            width: 140px;
-            height: 200px;
+            width: 110px;
+            height: 150px;
             background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border: 3px solid rgba(139, 92, 246, 0.5);
-            border-radius: var(--radius-lg);
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            border-radius: var(--radius-md);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-family: 'Orbitron', monospace;
-            font-size: 3.5rem;
-            font-weight: 900;
             color: var(--text-primary);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
-            cursor: pointer;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .duel-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.3) 50%, transparent 70%);
-            animation: cardShine 3s linear infinite;
-        }
-
-        @keyframes cardShine {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            perspective: 1000px;
         }
 
         .duel-card.flipped {
-            transform: rotateY(180deg) scale(1.1);
+            transform: rotateY(180deg);
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border-color: var(--warning);
-            box-shadow: 0 0 60px rgba(139, 92, 246, 0.8);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
         }
 
         .duel-card-back {
@@ -1512,10 +1519,24 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
             backface-visibility: hidden;
+            gap: 0.5rem;
+        }
+
+        .duel-card-pattern {
+            font-size: 2.5rem;
+            color: rgba(139, 92, 246, 0.5);
+        }
+
+        .duel-card-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .duel-card-front {
@@ -1523,88 +1544,83 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             transform: rotateY(180deg);
             backface-visibility: hidden;
+            gap: 0.5rem;
+            padding: 0.5rem;
         }
 
         .duel-number {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 50%, white 100%);
+            background: linear-gradient(135deg, var(--warning) 0%, white 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8));
-            animation: numberPulse 1s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6));
         }
 
-        @keyframes numberPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .duel-card-score {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .duel-vs {
             font-family: 'Orbitron', monospace;
-            font-size: 2.5rem;
+            font-size: 1.25rem;
             font-weight: 900;
-            color: var(--danger);
-            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
-            animation: vsPulse 1s ease-in-out infinite;
-        }
-
-        @keyframes vsPulse {
-            0%, 100% { transform: scale(1) rotate(-5deg); }
-            50% { transform: scale(1.2) rotate(5deg); }
+            color: var(--text-muted);
+            align-self: center;
         }
 
         .duel-instruction {
             font-family: 'Orbitron', monospace;
-            font-size: 1.25rem;
-            color: var(--warning);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
             text-align: center;
-            padding: var(--space-md);
-            background: rgba(245, 158, 11, 0.1);
-            border: 2px solid rgba(245, 158, 11, 0.3);
+            padding: 0.75rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: var(--radius-md);
-            animation: instructionBlink 2s ease-in-out infinite;
         }
 
-        @keyframes instructionBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+        .duel-results {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
         }
 
-        .duel-result {
+        .duel-result-item {
             font-family: 'Orbitron', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 0.875rem;
+            font-weight: 600;
             text-align: center;
-            padding: var(--space-lg);
-            border-radius: var(--radius-lg);
-            margin-top: var(--space-lg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            border: 2px solid;
         }
 
-        .duel-result.survivor {
-            background: rgba(16, 185, 129, 0.2);
-            border: 2px solid var(--success);
+        .duel-result-item.survivor {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
             color: var(--success);
         }
 
-        .duel-result.eliminated {
-            background: rgba(239, 68, 68, 0.2);
-            border: 2px solid var(--danger);
+        .duel-result-item.eliminated {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
             color: var(--danger);
         }
 
         @keyframes cardDraw {
             0% {
-                transform: translateY(-100%) rotate(-10deg);
+                transform: translateY(-50%) rotate(-5deg);
                 opacity: 0;
-            }
-            50% {
-                transform: translateY(10%) rotate(5deg);
             }
             100% {
                 transform: translateY(0) rotate(0deg);
@@ -1613,22 +1629,23 @@
         }
 
         .duel-card.drawing {
-            animation: cardDraw 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardDraw 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .lightning-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .duel-card {
+                width: 90px;
+                height: 130px;
+            }
 
-        @keyframes lightning {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+            .duel-number {
+                font-size: 2rem;
+            }
+
+            .duel-player {
+                min-width: 100px;
+            }
         }
     </style>
 </head>
@@ -1820,21 +1837,18 @@
             </div>
         </div>
 
-        <!-- Wizard's Duel Tie-Breaker Modal -->
+        <!-- Professional Duel Tie-Breaker Modal -->
         <div class="modal-overlay" id="duelModal">
-            <div class="modal" style="max-width: 900px;">
-                <div class="modal-icon modal-icon-warning">
-                    ⚔️
-                </div>
-                <h3 class="modal-title" style="background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 50%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem;">
-                    WIZARD'S DUEL!
+            <div class="modal" style="max-width: 95%; max-height: 90vh; overflow-y: auto;">
+                <h3 class="modal-title" style="background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 50%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 1.75rem;">
+                    TIE-BREAKER DUEL
                 </h3>
-                <p class="modal-text" style="font-size: 1.25rem; color: var(--warning); margin: var(--space-md) 0;">
-                    <span id="duelStoryline">🎭 The Council of Wizards has declared a DUEL!</span>
+                <p class="modal-text" style="font-size: 1rem; color: var(--text-secondary); margin: 0.5rem 0;">
+                    <span id="duelStoryline">Multiple players tied | Card draw determines elimination</span>
                 </p>
 
                 <div class="duel-instruction" id="duelInstruction">
-                    ✨ Tied players must draw the Card of Fate! Highest card SURVIVES! ✨
+                    Highest card survives | Lowest card eliminated
                 </div>
 
                 <div class="duel-container">
@@ -1843,12 +1857,12 @@
                     </div>
                 </div>
 
-                <div id="duelResult" class="duel-result" style="display: none;">
-                    <!-- Result displayed here -->
+                <div id="duelResults" class="duel-results" style="display: none;">
+                    <!-- Results displayed here -->
                 </div>
 
                 <div class="modal-buttons" id="duelButtons">
-                    <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">⚡ Draw Cards!</button>
+                    <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">DRAW CARDS</button>
                 </div>
             </div>
         </div>
@@ -2300,39 +2314,35 @@
             "Perfection achieved! All hail the wizard king/queen!"
         ];
 
-        // Wizard's Duel Messages
+        // Professional Duel Messages
         const duelStorylines = [
-            "🎭 The Council of Wizards has declared a DUEL!",
-            "⚔️ Ancient magic demands a trial by card!",
-            "🔮 The Crystal Ball shows... A TIE! Let fate decide!",
-            "⚡ Thunder rumbles... The spirits call for a duel!",
-            "🌩️ When wizards tie, only the cards can reveal the truth!",
-            "🎪 Ladies and gentlemen... WIZARD DUEL TIME!",
-            "🏰 The Tournament Master declares: TO THE CARDS!"
+            "Multiple players tied | Card draw determines elimination",
+            "Tie-breaker required | Draw to determine survivor",
+            "Equal scores detected | Highest card wins",
+            "Tournament rule invoked | Card draw elimination",
+            "Tie must be broken | Draw for survival"
         ];
 
         const duelMessages = {
             instruction: [
-                "✨ Tied players must draw the Card of Fate! Highest card SURVIVES! ✨",
-                "🎴 Each wizard draws a mystical number! Winner stays, loser goes! 🎴",
-                "🃏 The ancient tradition: Draw high or say goodbye! 🃏",
-                "⚡ May the luckiest wizard win this battle of fate! ⚡"
+                "Highest card survives | Lowest card eliminated",
+                "Draw determines fate | High survives, low eliminated",
+                "Card values decide | Highest stays, lowest goes",
+                "Elimination by draw | Highest card wins"
             ],
             survivor: [
-                "🎉 FORTUNE SMILES UPON YOU! You survive another round!",
-                "⚡ THE CARDS HAVE SPOKEN! You live to fight another day!",
-                "✨ DESTINY CHOSE YOU! Your journey continues!",
-                "🔥 LUCKY WIZARD! The stars aligned in your favor!",
-                "💫 FATE'S FAVORITE! You've earned your place!",
-                "🌟 THE CHOSEN ONE! Your card was supreme!"
+                "SURVIVED | Card value sufficient",
+                "CONTINUES | Draw successful",
+                "REMAINS | Higher card drawn",
+                "SAVED | Superior draw",
+                "ADVANCES | Winning card"
             ],
             eliminated: [
-                "💀 The cards were not in your favor... farewell, brave wizard!",
-                "🌩️ Lightning strikes! Your number sealed your fate!",
-                "⚔️ The duel is lost... but you fought with honor!",
-                "🎭 The curtain falls on your tournament journey...",
-                "💔 Cruel fate! The lowest card has spoken!",
-                "🚪 The door closes... better luck next time, wizard!"
+                "ELIMINATED | Lowest card drawn",
+                "REMOVED | Insufficient card value",
+                "OUT | Draw unsuccessful",
+                "DISCONNECTED | Lowest value",
+                "ELIMINATED | Card too low"
             ]
         };
 
@@ -2774,17 +2784,19 @@
                 playerDiv.className = 'duel-player';
                 playerDiv.id = `duel-player-${index}`;
                 playerDiv.innerHTML = `
-                    ${createAvatarHTML(player.avatar, '')}
-                    <div style="font-family: 'Orbitron', monospace; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
-                        ${player.name}
-                    </div>
-                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                        Score: ${player.totalScore}
+                    <div class="duel-player-info">
+                        ${createAvatarHTML(player.avatar, '')}
+                        <div class="duel-player-name">${player.name}</div>
+                        <div class="duel-player-score">Current: ${player.totalScore}</div>
                     </div>
                     <div class="duel-card drawing" id="duel-card-${index}">
-                        <div class="duel-card-back">🎴</div>
+                        <div class="duel-card-back">
+                            <div class="duel-card-pattern">?</div>
+                            <div class="duel-card-label">FACE DOWN</div>
+                        </div>
                         <div class="duel-card-front">
                             <div class="duel-number" id="duel-number-${index}">?</div>
+                            <div class="duel-card-score">Score: ${player.totalScore}</div>
                         </div>
                     </div>
                 `;
@@ -2793,9 +2805,9 @@
 
             // Reset button and result
             document.getElementById('duelButtons').innerHTML = `
-                <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">⚡ Draw Cards!</button>
+                <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">DRAW CARDS</button>
             `;
-            document.getElementById('duelResult').style.display = 'none';
+            document.getElementById('duelResults').style.display = 'none';
 
             modal.classList.add('active');
         }
@@ -2864,32 +2876,30 @@
             setTimeout(() => {
                 // Highlight winner in green
                 const winnerDiv = document.getElementById(`duel-player-${winner.index}`);
-                winnerDiv.classList.add('winner');
+                winnerDiv.classList.add('survivor');
 
                 // Highlight loser in red
                 const loserDiv = document.getElementById(`duel-player-${loser.index}`);
-                loserDiv.classList.add('loser');
+                loserDiv.classList.add('eliminated');
 
-                // Show result
-                const resultDiv = document.getElementById('duelResult');
+                // Show result - Professional format
+                const resultDiv = document.getElementById('duelResults');
                 const survivorMsg = duelMessages.survivor[Math.floor(Math.random() * duelMessages.survivor.length)];
                 const eliminatedMsg = duelMessages.eliminated[Math.floor(Math.random() * duelMessages.eliminated.length)];
 
                 resultDiv.innerHTML = `
-                    <div class="duel-result survivor">
-                        <strong>${winner.player.name}</strong> drew ${highest}!<br>
-                        ${survivorMsg}
+                    <div class="duel-result-item survivor">
+                        ${winner.player.name} drew ${highest} | ${survivorMsg}
                     </div>
-                    <div class="duel-result eliminated" style="margin-top: var(--space-md);">
-                        <strong>${loser.player.name}</strong> drew ${lowest}...<br>
-                        ${eliminatedMsg}
+                    <div class="duel-result-item eliminated">
+                        ${loser.player.name} drew ${lowest} | ${eliminatedMsg}
                     </div>
                 `;
-                resultDiv.style.display = 'block';
+                resultDiv.style.display = 'flex';
 
-                // Update button
+                // Update button - Professional text
                 document.getElementById('duelButtons').innerHTML = `
-                    <button class="modal-btn modal-btn-primary" onclick="closeDuelModal(${gameState.players.indexOf(loser.player)})">Continue Tournament</button>
+                    <button class="modal-btn modal-btn-primary" onclick="closeDuelModal(${gameState.players.indexOf(loser.player)})">CONTINUE</button>
                 `;
             }, 500);
         }
