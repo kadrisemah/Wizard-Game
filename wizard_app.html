@@ -2439,13 +2439,12 @@
         // FIXED Round Elimination Schedule (Tournament Style)
         // ALL players play all 20 rounds
         // Eliminate by SCORE at fixed rounds
-        // 7+ players → end with 3 final players
-        // 6 or fewer players → end with 2 final players
+        // ALL player counts → end with 3 final players
         function generateEliminationSchedule(numPlayers) {
             const schedule = [];
 
             // Fixed elimination rounds based on player count
-            // Pattern: Eliminate player-by-player until final players remain
+            // Pattern: Eliminate player-by-player until 3 final players remain
             switch(numPlayers) {
                 case 9:
                     schedule.push(6, 7, 8, 10, 12, 15); // 6 eliminations: 9→3
@@ -2457,18 +2456,15 @@
                     schedule.push(8, 10, 12, 15); // 4 eliminations: 7→3
                     break;
                 case 6:
-                    schedule.push(8, 10, 12, 15); // 4 eliminations: 6→2
+                    schedule.push(10, 12, 15); // 3 eliminations: 6→3
                     break;
                 case 5:
-                    schedule.push(10, 12, 15); // 3 eliminations: 5→2
+                    schedule.push(12, 15); // 2 eliminations: 5→3
                     break;
                 case 4:
-                    schedule.push(12, 15); // 2 eliminations: 4→2
+                    schedule.push(15); // 1 elimination: 4→3
                     break;
-                case 3:
-                    schedule.push(15); // 1 elimination: 3→2
-                    break;
-                // 2 or fewer: no eliminations
+                // 3 or fewer: no eliminations, play all 20 rounds
             }
 
             return schedule;
@@ -2481,12 +2477,11 @@
 
         function getScheduleDescription(numPlayers) {
             const schedule = generateEliminationSchedule(numPlayers);
-            const finalCount = numPlayers >= 7 ? 3 : 2;
 
-            if (numPlayers <= 2) {
+            if (numPlayers <= 3) {
                 return `${numPlayers} players: Play all 20 rounds • No eliminations`;
             } else {
-                return `${numPlayers} players: Eliminate at fixed rounds → Final ${finalCount} players play to round 20`;
+                return `${numPlayers} players: Eliminate at fixed rounds → Final 3 players play to round 20`;
             }
         }
 
@@ -3138,15 +3133,9 @@
         function eliminatePlayer() {
             const active = gameState.players.filter(p => !p.eliminated);
 
-            // Determine final player count based on initial player count
-            const initialPlayerCount = gameState.players.length;
-            const finalPlayerCount = initialPlayerCount >= 7 ? 3 : 2;
-
-            if (active.length <= finalPlayerCount) {
-                const message = finalPlayerCount === 3
-                    ? 'Final 3 players reached! Play to round 20!'
-                    : 'Final 2 players reached! Play to round 20!';
-                showAlert(message, 'info');
+            // Always end with 3 final players
+            if (active.length <= 3) {
+                showAlert('Final 3 players reached! Play to round 20!', 'info');
                 return;
             }
 
