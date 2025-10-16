@@ -1420,6 +1420,216 @@
             0%, 100% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); }
             50% { filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.9)); }
         }
+
+        /* Wizard's Duel Tie-Breaker System */
+        .duel-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        .duel-players {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        .duel-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: var(--radius-lg);
+            min-width: 200px;
+            transition: all 0.3s;
+        }
+
+        .duel-player.winner {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+        }
+
+        .duel-player.loser {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .duel-card {
+            width: 140px;
+            height: 200px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 3px solid rgba(139, 92, 246, 0.5);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .duel-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.3) 50%, transparent 70%);
+            animation: cardShine 3s linear infinite;
+        }
+
+        @keyframes cardShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .duel-card.flipped {
+            transform: rotateY(180deg) scale(1.1);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-color: var(--warning);
+            box-shadow: 0 0 60px rgba(139, 92, 246, 0.8);
+        }
+
+        .duel-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            backface-visibility: hidden;
+        }
+
+        .duel-card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        .duel-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 50%, white 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8));
+            animation: numberPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes numberPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .duel-vs {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--danger);
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+            animation: vsPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes vsPulse {
+            0%, 100% { transform: scale(1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+        }
+
+        .duel-instruction {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.25rem;
+            color: var(--warning);
+            text-align: center;
+            padding: var(--space-md);
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            border-radius: var(--radius-md);
+            animation: instructionBlink 2s ease-in-out infinite;
+        }
+
+        @keyframes instructionBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .duel-result {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .duel-result.survivor {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+
+        .duel-result.eliminated {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+        }
+
+        @keyframes cardDraw {
+            0% {
+                transform: translateY(-100%) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(10%) rotate(5deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .duel-card.drawing {
+            animation: cardDraw 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .lightning-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes lightning {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -1609,6 +1819,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Wizard's Duel Tie-Breaker Modal -->
+        <div class="modal-overlay" id="duelModal">
+            <div class="modal" style="max-width: 900px;">
+                <div class="modal-icon modal-icon-warning">
+                    ⚔️
+                </div>
+                <h3 class="modal-title" style="background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 50%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem;">
+                    WIZARD'S DUEL!
+                </h3>
+                <p class="modal-text" style="font-size: 1.25rem; color: var(--warning); margin: var(--space-md) 0;">
+                    <span id="duelStoryline">🎭 The Council of Wizards has declared a DUEL!</span>
+                </p>
+
+                <div class="duel-instruction" id="duelInstruction">
+                    ✨ Tied players must draw the Card of Fate! Highest card SURVIVES! ✨
+                </div>
+
+                <div class="duel-container">
+                    <div class="duel-players" id="duelPlayers">
+                        <!-- Dynamically generated duel cards -->
+                    </div>
+                </div>
+
+                <div id="duelResult" class="duel-result" style="display: none;">
+                    <!-- Result displayed here -->
+                </div>
+
+                <div class="modal-buttons" id="duelButtons">
+                    <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">⚡ Draw Cards!</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1661,6 +1904,18 @@
                     break;
                 case 'danger':
                     playDangerAlert(now);
+                    break;
+                case 'duelStart':
+                    playDuelStart(now);
+                    break;
+                case 'cardFlip':
+                    playCardFlip(now);
+                    break;
+                case 'duelVictory':
+                    playDuelVictory(now);
+                    break;
+                case 'lightning':
+                    playLightning(now);
                     break;
             }
         }
@@ -1894,6 +2149,98 @@
             });
         }
 
+        // Duel Start - Epic dramatic intro
+        function playDuelStart(startTime) {
+            // Deep dramatic chord
+            [220, 277.18, 329.63].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0.2 * masterVolume, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
+
+                osc.start(startTime);
+                osc.stop(startTime + 1.5);
+            });
+
+            // Thunder rumble
+            const rumble = audioContext.createOscillator();
+            const rumbleGain = audioContext.createGain();
+
+            rumble.connect(rumbleGain);
+            rumbleGain.connect(audioContext.destination);
+
+            rumble.type = 'sine';
+            rumble.frequency.setValueAtTime(60, startTime);
+            rumble.frequency.exponentialRampToValueAtTime(40, startTime + 1);
+            rumbleGain.gain.setValueAtTime(0.3 * masterVolume, startTime);
+            rumbleGain.gain.exponentialRampToValueAtTime(0.01, startTime + 1);
+
+            rumble.start(startTime);
+            rumble.stop(startTime + 1);
+        }
+
+        // Card Flip - Quick magical flip
+        function playCardFlip(startTime) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, startTime);
+            osc.frequency.exponentialRampToValueAtTime(1800, startTime + 0.1);
+            gain.gain.setValueAtTime(0.15 * masterVolume, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.1);
+        }
+
+        // Duel Victory - Triumphant but tense
+        function playDuelVictory(startTime) {
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, startTime + i * 0.15);
+                gain.gain.setValueAtTime(0.25 * masterVolume, startTime + i * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + i * 0.15 + 0.4);
+
+                osc.start(startTime + i * 0.15);
+                osc.stop(startTime + i * 0.15 + 0.4);
+            });
+        }
+
+        // Lightning - Electric crackle
+        function playLightning(startTime) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(2000, startTime);
+            osc.frequency.exponentialRampToValueAtTime(100, startTime + 0.15);
+            gain.gain.setValueAtTime(0.25 * masterVolume, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.15);
+        }
+
         // Toggle Mute
         function toggleMute() {
             isMuted = !isMuted;
@@ -1952,6 +2299,49 @@
             "Supreme excellence! You are the chosen one!",
             "Perfection achieved! All hail the wizard king/queen!"
         ];
+
+        // Wizard's Duel Messages
+        const duelStorylines = [
+            "🎭 The Council of Wizards has declared a DUEL!",
+            "⚔️ Ancient magic demands a trial by card!",
+            "🔮 The Crystal Ball shows... A TIE! Let fate decide!",
+            "⚡ Thunder rumbles... The spirits call for a duel!",
+            "🌩️ When wizards tie, only the cards can reveal the truth!",
+            "🎪 Ladies and gentlemen... WIZARD DUEL TIME!",
+            "🏰 The Tournament Master declares: TO THE CARDS!"
+        ];
+
+        const duelMessages = {
+            instruction: [
+                "✨ Tied players must draw the Card of Fate! Highest card SURVIVES! ✨",
+                "🎴 Each wizard draws a mystical number! Winner stays, loser goes! 🎴",
+                "🃏 The ancient tradition: Draw high or say goodbye! 🃏",
+                "⚡ May the luckiest wizard win this battle of fate! ⚡"
+            ],
+            survivor: [
+                "🎉 FORTUNE SMILES UPON YOU! You survive another round!",
+                "⚡ THE CARDS HAVE SPOKEN! You live to fight another day!",
+                "✨ DESTINY CHOSE YOU! Your journey continues!",
+                "🔥 LUCKY WIZARD! The stars aligned in your favor!",
+                "💫 FATE'S FAVORITE! You've earned your place!",
+                "🌟 THE CHOSEN ONE! Your card was supreme!"
+            ],
+            eliminated: [
+                "💀 The cards were not in your favor... farewell, brave wizard!",
+                "🌩️ Lightning strikes! Your number sealed your fate!",
+                "⚔️ The duel is lost... but you fought with honor!",
+                "🎭 The curtain falls on your tournament journey...",
+                "💔 Cruel fate! The lowest card has spoken!",
+                "🚪 The door closes... better luck next time, wizard!"
+            ]
+        };
+
+        // Duel State
+        let duelState = {
+            players: [],
+            cards: {},
+            inProgress: false
+        };
 
         // FIXED Round Elimination Schedule (Tournament Style)
         // ALL players play all 20 rounds
@@ -2344,6 +2734,183 @@
             showAlert(`Round ${gameState.currentRound} - ${gameState.cardsDealt} cards dealt`, 'info');
         }
 
+        // ⚔️ WIZARD'S DUEL TIE-BREAKER SYSTEM ⚔️
+        function initiateDuel(tiedPlayers) {
+            duelState.players = tiedPlayers;
+            duelState.cards = {};
+            duelState.inProgress = true;
+
+            // Generate random cards for each player (1-100)
+            tiedPlayers.forEach(player => {
+                duelState.cards[player.name] = Math.floor(Math.random() * 100) + 1;
+            });
+
+            showDuelModal();
+        }
+
+        function showDuelModal() {
+            playSound('duelStart'); // Epic duel intro sound
+
+            const modal = document.getElementById('duelModal');
+            const storyline = duelStorylines[Math.floor(Math.random() * duelStorylines.length)];
+            const instruction = duelMessages.instruction[Math.floor(Math.random() * duelMessages.instruction.length)];
+
+            document.getElementById('duelStoryline').textContent = storyline;
+            document.getElementById('duelInstruction').textContent = instruction;
+
+            // Build duel players UI
+            const playersContainer = document.getElementById('duelPlayers');
+            playersContainer.innerHTML = '';
+
+            duelState.players.forEach((player, index) => {
+                if (index > 0) {
+                    const vs = document.createElement('div');
+                    vs.className = 'duel-vs';
+                    vs.textContent = 'VS';
+                    playersContainer.appendChild(vs);
+                }
+
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'duel-player';
+                playerDiv.id = `duel-player-${index}`;
+                playerDiv.innerHTML = `
+                    ${createAvatarHTML(player.avatar, '')}
+                    <div style="font-family: 'Orbitron', monospace; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
+                        ${player.name}
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        Score: ${player.totalScore}
+                    </div>
+                    <div class="duel-card drawing" id="duel-card-${index}">
+                        <div class="duel-card-back">🎴</div>
+                        <div class="duel-card-front">
+                            <div class="duel-number" id="duel-number-${index}">?</div>
+                        </div>
+                    </div>
+                `;
+                playersContainer.appendChild(playerDiv);
+            });
+
+            // Reset button and result
+            document.getElementById('duelButtons').innerHTML = `
+                <button class="modal-btn modal-btn-primary" onclick="startDuelDraw()">⚡ Draw Cards!</button>
+            `;
+            document.getElementById('duelResult').style.display = 'none';
+
+            modal.classList.add('active');
+        }
+
+        function startDuelDraw() {
+            playSound('lightning'); // Electric sound
+
+            // Disable button
+            document.getElementById('duelButtons').innerHTML = `
+                <button class="modal-btn modal-btn-secondary" disabled>🎴 Drawing...</button>
+            `;
+
+            // Reveal cards one by one with dramatic timing
+            duelState.players.forEach((player, index) => {
+                setTimeout(() => {
+                    revealCard(index, player);
+                }, index * 800); // Stagger reveals
+            });
+
+            // Determine winner after all cards revealed
+            setTimeout(() => {
+                determineDuelWinner();
+            }, duelState.players.length * 800 + 1000);
+        }
+
+        function revealCard(index, player) {
+            playSound('cardFlip');
+
+            const card = document.getElementById(`duel-card-${index}`);
+            const number = document.getElementById(`duel-number-${index}`);
+
+            // Flip animation
+            card.classList.add('flipped');
+
+            // Show number
+            setTimeout(() => {
+                number.textContent = duelState.cards[player.name];
+            }, 250);
+        }
+
+        function determineDuelWinner() {
+            playSound('duelVictory');
+            playSound('lightning');
+
+            // Find highest and lowest cards
+            let highest = -1;
+            let lowest = 101;
+            let winner = null;
+            let loser = null;
+
+            duelState.players.forEach((player, index) => {
+                const cardValue = duelState.cards[player.name];
+
+                if (cardValue > highest) {
+                    highest = cardValue;
+                    winner = { player, index };
+                }
+
+                if (cardValue < lowest) {
+                    lowest = cardValue;
+                    loser = { player, index };
+                }
+            });
+
+            // Visual feedback
+            setTimeout(() => {
+                // Highlight winner in green
+                const winnerDiv = document.getElementById(`duel-player-${winner.index}`);
+                winnerDiv.classList.add('winner');
+
+                // Highlight loser in red
+                const loserDiv = document.getElementById(`duel-player-${loser.index}`);
+                loserDiv.classList.add('loser');
+
+                // Show result
+                const resultDiv = document.getElementById('duelResult');
+                const survivorMsg = duelMessages.survivor[Math.floor(Math.random() * duelMessages.survivor.length)];
+                const eliminatedMsg = duelMessages.eliminated[Math.floor(Math.random() * duelMessages.eliminated.length)];
+
+                resultDiv.innerHTML = `
+                    <div class="duel-result survivor">
+                        <strong>${winner.player.name}</strong> drew ${highest}!<br>
+                        ${survivorMsg}
+                    </div>
+                    <div class="duel-result eliminated" style="margin-top: var(--space-md);">
+                        <strong>${loser.player.name}</strong> drew ${lowest}...<br>
+                        ${eliminatedMsg}
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+
+                // Update button
+                document.getElementById('duelButtons').innerHTML = `
+                    <button class="modal-btn modal-btn-primary" onclick="closeDuelModal(${gameState.players.indexOf(loser.player)})">Continue Tournament</button>
+                `;
+            }, 500);
+        }
+
+        function closeDuelModal(loserIndex) {
+            document.getElementById('duelModal').classList.remove('active');
+
+            duelState.inProgress = false;
+
+            // Eliminate the loser
+            const eliminated = gameState.players[loserIndex];
+            eliminated.eliminated = true;
+            eliminated.eliminatedOnRound = gameState.currentRound;
+
+            // Show standard elimination modal
+            setTimeout(() => {
+                showEliminationAnimation(eliminated);
+                updateStatistics();
+            }, 500);
+        }
+
         function eliminatePlayer() {
             const active = gameState.players.filter(p => !p.eliminated);
 
@@ -2360,6 +2927,13 @@
                 return;
             }
 
+            // ⚔️ TIE-BREAKER: If multiple players tied for lowest, trigger DUEL!
+            if (toEliminate.length > 1) {
+                initiateDuel(toEliminate);
+                return;
+            }
+
+            // Single player elimination (no tie)
             const eliminated = toEliminate[0];
             eliminated.eliminated = true;
             eliminated.eliminatedOnRound = gameState.currentRound;
