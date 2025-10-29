@@ -2369,9 +2369,9 @@
     <div id="setupScreen" style="display: none;">
         <div class="setup-container">
             <h1 class="setup-title">WIZARD</h1>
-            <p class="setup-subtitle">The Ultimate Card Game Tournament</p>
+            <p class="setup-subtitle">🎮 Single Player vs AI Bots</p>
 
-            <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">Select Number of Players</h3>
+            <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">Select Number of AI Opponents</h3>
             <div class="player-count-selector">
                 <button class="player-count-btn" onclick="selectPlayerCount(3, this)">3</button>
                 <button class="player-count-btn selected" onclick="selectPlayerCount(4, this)">4</button>
@@ -2379,7 +2379,7 @@
                 <button class="player-count-btn" onclick="selectPlayerCount(6, this)">6</button>
             </div>
 
-            <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">Enter Player Names</h3>
+            <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">Enter Your Name</h3>
             <div class="player-names" id="playerNamesContainer">
                 <!-- Dynamic player inputs -->
             </div>
@@ -2668,7 +2668,10 @@
             container.innerHTML = '';
 
             for (let i = 0; i < selectedPlayerCount; i++) {
-                const defaultName = i === 0 ? 'You' : `Player ${i + 1}`;
+                const aiNames = ['🤖 AI Bot Alpha', '🤖 AI Bot Beta', '🤖 AI Bot Gamma', '🤖 AI Bot Delta', '🤖 AI Bot Epsilon'];
+                const defaultName = i === 0 ? 'You' : aiNames[i - 1];
+                const isAI = i !== 0;
+
                 container.innerHTML += `
                     <div class="player-input-group">
                         <div class="player-number">${i + 1}</div>
@@ -2678,6 +2681,7 @@
                             id="playerName${i}"
                             placeholder="${defaultName}"
                             value="${defaultName}"
+                            ${isAI ? 'disabled style="opacity: 0.7; cursor: not-allowed; background: rgba(139, 92, 246, 0.1);"' : ''}
                         >
                     </div>
                 `;
@@ -2685,11 +2689,19 @@
         }
 
         function startGame() {
-            // Collect player names
+            // Collect player names - Only first player is human, rest are AI
             gameState.playerNames = [];
             for (let i = 0; i < selectedPlayerCount; i++) {
                 const input = document.getElementById(`playerName${i}`);
-                const name = input.value.trim() || (i === 0 ? 'You' : `Player ${i + 1}`);
+                let name;
+                if (i === 0) {
+                    // Human player
+                    name = input.value.trim() || 'You';
+                } else {
+                    // AI players
+                    const aiNames = ['AI Bot Alpha', 'AI Bot Beta', 'AI Bot Gamma', 'AI Bot Delta', 'AI Bot Epsilon'];
+                    name = aiNames[i - 1] || `AI Bot ${i}`;
+                }
                 gameState.playerNames.push(name);
             }
 
@@ -2977,6 +2989,34 @@
                 return;
             }
 
+            // AI AUTO-BID (only player 0 is human in local mode)
+            if (playerIndex !== 0 && !onlineMode) {
+                console.log(`🤖 AI bidding for ${playerName}...`);
+                updateActivePlayer(playerIndex);
+                setTimeout(() => {
+                    const aiBid = calculateAIBid(playerIndex);
+                    gameState.bids[playerName] = aiBid;
+                    updateUI();
+                    updateBidHistory(playerName, aiBid);
+                    showToast(`${playerName} bids ${aiBid} trick${aiBid !== 1 ? 's' : ''}`, 'info', 1500);
+                    playSound('bidConfirm');
+
+                    // Check if all players bid
+                    const activePlayers = gameState.players.filter(p => !gameState.eliminated || !gameState.eliminated.includes(p));
+                    const biddedPlayers = activePlayers.filter(p => gameState.bids[p] !== null && gameState.bids[p] !== undefined);
+
+                    if (biddedPlayers.length >= activePlayers.length) {
+                        startPlaying();
+                    } else {
+                        const nextIndex = getNextActivePlayerIndex((playerIndex + 1) % gameState.players.length);
+                        gameState.currentBiddingPlayerIndex = nextIndex;
+                        setTimeout(() => showBiddingForPlayer(nextIndex), 800);
+                    }
+                }, 1000);
+                return;
+            }
+
+            // HUMAN PLAYER
             document.getElementById('biddingPlayerName').textContent = playerName;
             gameState.currentBid = 0;
             document.getElementById('bidValue').textContent = '0';
@@ -3284,22 +3324,199 @@
             }
         }
 
+        /* ═══════════════════════════════════════════════════════════════ */
+        /*   SMART AI LOGIC - PROFESSIONAL BOT SYSTEM                      */
+        /* ═══════════════════════════════════════════════════════════════ */
+
+        function calculateAIBid(playerIndex) {
+            const player = gameState.players[playerIndex];
+            const hand = gameState.playerHands[player];
+            const trumpSuit = gameState.trumpSuit;
+
+            let estimatedTricks = 0;
+
+            // Count wizards (guaranteed wins)
+            const wizards = hand.filter(c => c.suit === 'wizard').length;
+            estimatedTricks += wizards;
+
+            // Count trump cards
+            const trumpCards = hand.filter(c => c.suit === trumpSuit);
+            const highTrumps = trumpCards.filter(c => {
+                const value = c.rank === 'A' ? 14 : c.rank === 'K' ? 13 : c.rank === 'Q' ? 12 : c.rank === 'J' ? 11 : parseInt(c.rank) || 0;
+                return value >= 10; // J, Q, K, A
+            }).length;
+            estimatedTricks += Math.floor(highTrumps * 0.7); // 70% chance high trumps win
+
+            // Count aces in non-trump suits
+            hand.forEach(card => {
+                if (card.suit !== trumpSuit && card.suit !== 'wizard' && card.suit !== 'jester' && card.rank === 'A') {
+                    estimatedTricks += 0.5; // 50% chance ace wins
+                }
+            });
+
+            // Don't count jesters (they lose)
+            const jesters = hand.filter(c => c.suit === 'jester').length;
+
+            // Round and add slight randomness for realism
+            const randomFactor = Math.random() * 0.5 - 0.25; // -0.25 to +0.25
+            estimatedTricks = Math.max(0, Math.min(gameState.currentRound, Math.round(estimatedTricks + randomFactor)));
+
+            console.log(`🤖 AI ${player} estimates ${estimatedTricks} tricks (${wizards} wizards, ${highTrumps} high trumps, ${jesters} jesters)`);
+            return estimatedTricks;
+        }
+
         function playAICard(playerIndex) {
             const player = gameState.players[playerIndex];
             const hand = gameState.playerHands[player];
 
             if (hand.length === 0) return;
 
-            // Simple AI: play first valid card
-            let cardToPlay = hand[0];
+            let cardToPlay = selectSmartAICard(playerIndex, hand);
+            playCard(playerIndex, cardToPlay.id);
+        }
 
-            // Try to follow suit
-            if (gameState.leadSuit) {
-                const suitCard = hand.find(c => c.suit === gameState.leadSuit);
-                if (suitCard) cardToPlay = suitCard;
+        function selectSmartAICard(playerIndex, hand) {
+            const player = gameState.players[playerIndex];
+            const bid = gameState.bids[player] || 0;
+            const tricksWon = gameState.tricksWon[player] || 0;
+            const tricksRemaining = hand.length;
+            const tricksNeeded = bid - tricksWon;
+            const isLeading = gameState.currentTrick.length === 0;
+
+            console.log(`🤖 AI ${player}: Bid ${bid}, Won ${tricksWon}, Need ${tricksNeeded} more`);
+
+            // If leading the trick
+            if (isLeading) {
+                return selectLeadCard(hand, tricksNeeded, tricksRemaining);
             }
 
-            playCard(playerIndex, cardToPlay.id);
+            // If following
+            return selectFollowCard(hand, tricksNeeded, tricksRemaining);
+        }
+
+        function selectLeadCard(hand, tricksNeeded, tricksRemaining) {
+            // If need all remaining tricks, play highest card
+            if (tricksNeeded >= tricksRemaining) {
+                return getHighestCard(hand);
+            }
+
+            // If already met bid, play lowest card
+            if (tricksNeeded <= 0) {
+                return getLowestCard(hand);
+            }
+
+            // Otherwise play medium card
+            return getMediumCard(hand);
+        }
+
+        function selectFollowCard(hand, tricksNeeded, tricksRemaining) {
+            const leadSuit = gameState.leadSuit;
+            const trumpSuit = gameState.trumpSuit;
+
+            // Get valid cards (must follow suit if possible)
+            let validCards = hand.filter(c => c.suit === leadSuit || c.suit === 'wizard' || c.suit === 'jester');
+            if (validCards.length === 0) validCards = hand; // Can play anything if can't follow
+
+            // Determine if currently winning
+            const currentWinner = getCurrentTrickWinner();
+            const needToWin = tricksNeeded > 0;
+
+            // If need to win this trick
+            if (needToWin && tricksNeeded >= tricksRemaining) {
+                // Play wizard if have one
+                const wizard = validCards.find(c => c.suit === 'wizard');
+                if (wizard) return wizard;
+
+                // Try to play higher than current winner
+                return getHighestCard(validCards);
+            }
+
+            // If don't need to win, play lowest
+            if (tricksNeeded <= 0) {
+                const jester = validCards.find(c => c.suit === 'jester');
+                if (jester) return jester;
+                return getLowestCard(validCards);
+            }
+
+            // Middle strategy - save wizards and high cards
+            const nonSpecial = validCards.filter(c => c.suit !== 'wizard');
+            if (nonSpecial.length > 0) {
+                return getMediumCard(nonSpecial);
+            }
+
+            return validCards[0];
+        }
+
+        function getCurrentTrickWinner() {
+            if (gameState.currentTrick.length === 0) return null;
+
+            let winningPlay = gameState.currentTrick[0];
+            for (let i = 1; i < gameState.currentTrick.length; i++) {
+                const play = gameState.currentTrick[i];
+                if (beats(play.card, winningPlay.card)) {
+                    winningPlay = play;
+                }
+            }
+            return winningPlay;
+        }
+
+        function beats(card1, card2) {
+            if (card1.suit === 'wizard') return true;
+            if (card2.suit === 'wizard') return false;
+            if (card1.suit === 'jester') return false;
+            if (card2.suit === 'jester') return true;
+
+            const trumpSuit = gameState.trumpSuit;
+            if (card1.suit === trumpSuit && card2.suit !== trumpSuit) return true;
+            if (card2.suit === trumpSuit && card1.suit !== trumpSuit) return false;
+
+            if (card1.suit !== card2.suit) return false;
+
+            return getCardValue(card1) > getCardValue(card2);
+        }
+
+        function getCardValue(card) {
+            if (card.rank === 'A') return 14;
+            if (card.rank === 'K') return 13;
+            if (card.rank === 'Q') return 12;
+            if (card.rank === 'J') return 11;
+            return parseInt(card.rank) || 0;
+        }
+
+        function getHighestCard(cards) {
+            const wizards = cards.filter(c => c.suit === 'wizard');
+            if (wizards.length > 0) return wizards[0];
+
+            return cards.reduce((highest, card) => {
+                if (card.suit === 'jester') return highest;
+                if (highest.suit === 'jester') return card;
+
+                const trumpSuit = gameState.trumpSuit;
+                if (card.suit === trumpSuit && highest.suit !== trumpSuit) return card;
+                if (highest.suit === trumpSuit && card.suit !== trumpSuit) return highest;
+
+                return getCardValue(card) > getCardValue(highest) ? card : highest;
+            }, cards[0]);
+        }
+
+        function getLowestCard(cards) {
+            const jesters = cards.filter(c => c.suit === 'jester');
+            if (jesters.length > 0) return jesters[0];
+
+            return cards.reduce((lowest, card) => {
+                if (card.suit === 'wizard') return lowest;
+                if (lowest.suit === 'wizard') return card;
+
+                return getCardValue(card) < getCardValue(lowest) ? card : lowest;
+            }, cards[0]);
+        }
+
+        function getMediumCard(cards) {
+            const nonSpecial = cards.filter(c => c.suit !== 'wizard' && c.suit !== 'jester');
+            if (nonSpecial.length === 0) return cards[0];
+
+            const sorted = [...nonSpecial].sort((a, b) => getCardValue(a) - getCardValue(b));
+            return sorted[Math.floor(sorted.length / 2)];
         }
 
         function isValidPlay(player, card) {
@@ -4375,13 +4592,13 @@
 
             if (totalCount < minPlayers) {
                 const needed = minPlayers - totalCount;
-                waitingText.textContent = `⏳ Waiting for ${needed} more player${needed > 1 ? 's' : ''} to join... (Min: ${minPlayers} players)`;
+                waitingText.textContent = `Waiting for ${needed} more player${needed > 1 ? 's' : ''} to join... (Min: ${minPlayers} players)`;
                 waitingText.style.color = 'var(--text-secondary)';
                 if (isHost) startBtn.style.display = 'none';
             } else if (readyCount < totalCount) {
                 const notReady = totalCount - readyCount;
                 const notReadyPlayers = playerList.filter(p => !p.isReady).map(p => p.name).join(', ');
-                waitingText.textContent = `⏳ Waiting for ${notReady} player${notReady > 1 ? 's' : ''} to ready up: ${notReadyPlayers}`;
+                waitingText.textContent = `Waiting for ${notReady} player${notReady > 1 ? 's' : ''} to ready up: ${notReadyPlayers}`;
                 waitingText.style.color = 'var(--accent)';
                 if (isHost) startBtn.style.display = 'none';
             } else {
