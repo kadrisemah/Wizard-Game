@@ -549,12 +549,45 @@
         .player-info.active {
             border-color: var(--primary);
             box-shadow: var(--glow-primary);
-            animation: pulseGlow 2s ease-in-out infinite;
+            animation: pulseGlow 1.5s ease-in-out infinite;
+            opacity: 1 !important;
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
         }
 
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: var(--glow-primary); }
-            50% { box-shadow: 0 0 50px rgba(139, 92, 246, 1); }
+            0%, 100% {
+                box-shadow: var(--glow-primary);
+                border-color: var(--primary);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(139, 92, 246, 1), 0 0 80px rgba(139, 92, 246, 0.6);
+                border-color: rgba(139, 92, 246, 1);
+            }
+        }
+
+        .your-turn-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 20px;
+            margin-top: 0.3rem;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+            animation: bounceIn 0.5s ease, shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
         }
 
         .player-name {
@@ -2640,7 +2673,11 @@
 
             // Bidding
             currentBiddingPlayerIndex: 0,
-            currentBid: 0
+            currentBid: 0,
+
+            // Elimination System
+            eliminated: [],
+            eliminationSchedule: []
         };
 
         // ===== SETUP FUNCTIONS =====
@@ -2707,6 +2744,10 @@
 
             gameState.players = gameState.playerNames;
 
+            // Generate elimination schedule
+            gameState.eliminationSchedule = generateEliminationSchedule(selectedPlayerCount);
+            console.log(`📋 Elimination schedule:`, gameState.eliminationSchedule);
+
             // Initialize player data
             gameState.players.forEach(player => {
                 gameState.playerHands[player] = [];
@@ -2750,7 +2791,10 @@
                 container.innerHTML += `
                     <div class="player-area ${positionClass}" id="playerArea${index}">
                         <div class="player-info" id="playerInfo${index}">
-                            <div class="player-name">${player}</div>
+                            <div class="player-name">
+                                ${player}
+                                <span id="playerBadge${index}" class="player-badge" style="display: none; margin-left: 0.5rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: bold;"></span>
+                            </div>
                             <div class="player-stats">
                                 <span>Bid: <strong id="playerBid${index}">—</strong></span>
                                 <span>Tricks: <strong id="playerTricks${index}">0</strong></span>
@@ -2950,7 +2994,7 @@
         }
 
         function getNextActivePlayerIndex(startIndex) {
-            // Find next non-eliminated player
+            // Find next non-eliminated player (anticlockwise direction)
             let index = startIndex;
             let attempts = 0;
 
@@ -2959,7 +3003,8 @@
                 if (!gameState.eliminated || !gameState.eliminated.includes(playerName)) {
                     return index;
                 }
-                index = (index + 1) % gameState.players.length;
+                // Go anticlockwise (decrement with wrapping)
+                index = (index - 1 + gameState.players.length) % gameState.players.length;
                 attempts++;
             }
 
@@ -2969,8 +3014,8 @@
 
         function startBidding() {
             gameState.phase = 'bidding';
-            // Start with player after dealer, skipping eliminated
-            const startIndex = (gameState.dealerIndex + 1) % gameState.players.length;
+            // Start with player anticlockwise from dealer, skipping eliminated
+            const startIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
             gameState.currentBiddingPlayerIndex = getNextActivePlayerIndex(startIndex);
             updatePhaseDisplay();
             showBiddingForPlayer(gameState.currentBiddingPlayerIndex);
@@ -2982,7 +3027,7 @@
             // Skip if player is eliminated
             if (gameState.eliminated && gameState.eliminated.includes(playerName)) {
                 console.log(`Skipping eliminated player: ${playerName}`);
-                const nextIndex = getNextActivePlayerIndex((playerIndex + 1) % gameState.players.length);
+                const nextIndex = getNextActivePlayerIndex((playerIndex - 1 + gameState.players.length) % gameState.players.length);
                 if (nextIndex !== playerIndex) {
                     showBiddingForPlayer(nextIndex);
                 }
@@ -3008,7 +3053,7 @@
                     if (biddedPlayers.length >= activePlayers.length) {
                         startPlaying();
                     } else {
-                        const nextIndex = getNextActivePlayerIndex((playerIndex + 1) % gameState.players.length);
+                        const nextIndex = getNextActivePlayerIndex((playerIndex - 1 + gameState.players.length) % gameState.players.length);
                         gameState.currentBiddingPlayerIndex = nextIndex;
                         setTimeout(() => showBiddingForPlayer(nextIndex), 800);
                     }
@@ -3055,8 +3100,8 @@
                 // All active players have bid
                 startPlaying();
             } else {
-                // Next active player bids
-                const nextIndex = getNextActivePlayerIndex((gameState.currentBiddingPlayerIndex + 1) % gameState.players.length);
+                // Next active player bids (anticlockwise)
+                const nextIndex = getNextActivePlayerIndex((gameState.currentBiddingPlayerIndex - 1 + gameState.players.length) % gameState.players.length);
                 gameState.currentBiddingPlayerIndex = nextIndex;
 
                 setTimeout(() => {
@@ -3161,6 +3206,24 @@
 
             // Update player info and hands
             gameState.players.forEach((player, index) => {
+                const isEliminated = gameState.eliminated && gameState.eliminated.includes(player);
+                const playerArea = document.getElementById(`playerArea${index}`);
+                const badgeEl = document.getElementById(`playerBadge${index}`);
+
+                // Show elimination badge and gray out if eliminated
+                if (isEliminated) {
+                    badgeEl.textContent = '💀 OUT';
+                    badgeEl.style.display = 'inline-block';
+                    badgeEl.style.background = 'var(--danger)';
+                    badgeEl.style.color = 'white';
+                    playerArea.style.opacity = '0.5';
+                    playerArea.style.filter = 'grayscale(60%)';
+                } else {
+                    badgeEl.style.display = 'none';
+                    playerArea.style.opacity = '1';
+                    playerArea.style.filter = 'none';
+                }
+
                 document.getElementById(`playerBid${index}`).textContent = gameState.bids[player] !== null ? gameState.bids[player] : '—';
                 document.getElementById(`playerTricks${index}`).textContent = gameState.tricksWon[player];
                 document.getElementById(`playerScore${index}`).textContent = gameState.scores[player];
@@ -3237,8 +3300,31 @@
         function updateActivePlayer(playerIndex) {
             gameState.players.forEach((player, index) => {
                 const infoEl = document.getElementById(`playerInfo${index}`);
+
+                // Remove any existing turn badge
+                const existingBadge = infoEl.querySelector('.your-turn-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+
                 if (index === playerIndex) {
                     infoEl.classList.add('active');
+
+                    // Add badge for human player
+                    if (index === 0) {
+                        const badge = document.createElement('div');
+                        badge.className = 'your-turn-badge';
+
+                        if (gameState.phase === 'playing') {
+                            badge.textContent = '👆 YOUR TURN';
+                        } else if (gameState.phase === 'bidding') {
+                            badge.textContent = '💭 YOUR BID';
+                        }
+
+                        if (gameState.phase === 'playing' || gameState.phase === 'bidding') {
+                            infoEl.appendChild(badge);
+                        }
+                    }
                 } else {
                     infoEl.classList.remove('active');
                 }
@@ -3307,8 +3393,8 @@
 
             updateUI();
 
-            // Next player
-            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            // Next player (anticlockwise)
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length;
             updateActivePlayer(gameState.currentPlayerIndex);
 
             console.log(`📍 Trick: ${gameState.currentTrick.length}/${gameState.players.length} cards`);
@@ -3582,6 +3668,111 @@
             return sorted[Math.floor(sorted.length / 2)];
         }
 
+        /* ═══════════════════════════════════════════════════════════════ */
+        /*   ELIMINATION SYSTEM - PROFESSIONAL TOURNAMENT                   */
+        /* ═══════════════════════════════════════════════════════════════ */
+
+        function generateEliminationSchedule(numPlayers) {
+            const schedule = [];
+            // Fixed elimination rounds - always end with 3 final players
+            switch(numPlayers) {
+                case 6:
+                    schedule.push(10, 12, 15); // 3 eliminations: 6→3
+                    break;
+                case 5:
+                    schedule.push(12, 15); // 2 eliminations: 5→3
+                    break;
+                case 4:
+                    schedule.push(15); // 1 elimination: 4→3
+                    break;
+                // 3 or fewer: no eliminations
+            }
+            return schedule;
+        }
+
+        function checkElimination() {
+            const round = gameState.currentRound;
+            if (gameState.eliminationSchedule.includes(round)) {
+                console.log(`💀 ELIMINATION ROUND ${round}!`);
+                setTimeout(() => eliminatePlayer(), 1500);
+            }
+        }
+
+        function eliminatePlayer() {
+            const activePlayers = gameState.players.filter(p => !gameState.eliminated.includes(p));
+
+            // Always end with 3 final players
+            if (activePlayers.length <= 3) {
+                showToast('Final 3 players! Play to round 20!', 'success', 3000);
+                return;
+            }
+
+            // Find lowest scorer
+            const scores = activePlayers.map(p => ({
+                name: p,
+                score: gameState.scores[p] || 0
+            }));
+
+            const lowest = Math.min(...scores.map(s => s.score));
+            const toEliminate = scores.filter(s => s.score === lowest);
+
+            // Single player elimination (no tie)
+            const eliminated = toEliminate[0].name;
+            gameState.eliminated.push(eliminated);
+
+            console.log(`💀 ${eliminated} ELIMINATED at round ${gameState.currentRound}!`);
+
+            // Show elimination modal
+            showEliminationModal(eliminated);
+        }
+
+        function showEliminationModal(playerName) {
+            const modal = document.getElementById('eliminationModal');
+
+            // Set player name and avatar
+            document.getElementById('eliminatedName').textContent = playerName;
+            document.getElementById('eliminatedRound').textContent = gameState.currentRound;
+            document.getElementById('eliminatedScore').textContent = gameState.scores[playerName] || 0;
+
+            // Add player avatar (first letter in circle)
+            const avatarDiv = document.getElementById('eliminatedAvatar');
+            avatarDiv.innerHTML = `
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--danger), #DC143C);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2.5rem;
+                    font-weight: bold;
+                    margin: 0 auto;
+                    box-shadow: 0 5px 20px rgba(220, 20, 60, 0.5);
+                ">${playerName[0].toUpperCase()}</div>
+            `;
+
+            // Random elimination message
+            const messages = [
+                "The cards have spoken... farewell! 🃏",
+                "Your wizard has left the building 🚪",
+                "Disconnected from the tournament 🔌",
+                "Better luck next time! 🎯",
+                "The tournament ends here ⚔️"
+            ];
+            document.getElementById('eliminationMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
+
+            modal.classList.add('active');
+            playSound('cardPlace');
+
+            // Update UI
+            updateUI();
+        }
+
+        function closeEliminationModal() {
+            document.getElementById('eliminationModal').classList.remove('active');
+        }
+
         function isValidPlay(player, card) {
             if (gameState.currentTrick.length === 0) return true; // Leading
             if (card.suit === 'wizard' || card.suit === 'jester') return true; // Special cards
@@ -3739,7 +3930,8 @@
         function proceedToNextRound() {
             // Move to next round
             gameState.currentRound++;
-            gameState.dealerIndex = (gameState.dealerIndex + 1) % gameState.players.length;
+            // Dealer rotates anticlockwise
+            gameState.dealerIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
 
             if (gameState.currentRound <= gameState.maxRounds) {
                 startRound();
