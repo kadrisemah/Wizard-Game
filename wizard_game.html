@@ -3131,9 +3131,8 @@
 
         function startBidding() {
             gameState.phase = 'bidding';
-            // Start with player anticlockwise from dealer, skipping eliminated
-            const startIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
-            gameState.currentBiddingPlayerIndex = getNextActivePlayerIndex(startIndex);
+            // Bidding starts FROM the dealer
+            gameState.currentBiddingPlayerIndex = getNextActivePlayerIndex(gameState.dealerIndex);
             updatePhaseDisplay();
             showBiddingForPlayer(gameState.currentBiddingPlayerIndex);
         }
@@ -3294,8 +3293,8 @@
         function startPlaying() {
             gameState.phase = 'playing';
 
-            // SAME player who bid first also plays first (left of dealer in anticlockwise)
-            // This matches startBidding() logic
+            // Playing starts LEFT of dealer (anticlockwise)
+            // Note: This is DIFFERENT from bidding (which starts FROM dealer)
             const startIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
             gameState.leadPlayerIndex = getNextActivePlayerIndex(startIndex);
             gameState.currentPlayerIndex = gameState.leadPlayerIndex;
