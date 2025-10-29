@@ -4055,21 +4055,26 @@
         function initializeSocket() {
             try {
                 // ═══════════════════════════════════════════════════════════
-                // SERVER CONNECTION FOR GITHUB PAGES
+                // SERVER CONNECTION
                 // ═══════════════════════════════════════════════════════════
-                // Server hosted on Vercel: https://wizard-game-kadrisemah.vercel.app
-                const VERCEL_SERVER = 'https://wizard-game-kadrisemah.vercel.app';
+                // Server hosted on Render: https://wizard-game-server-wvwp.onrender.com
+                const RENDER_SERVER = 'https://wizard-game-server-wvwp.onrender.com';
 
                 // Auto-detect environment
                 const isLocalhost = window.location.hostname === 'localhost' ||
                                    window.location.hostname === '127.0.0.1';
 
+                const isRenderDomain = window.location.hostname.includes('onrender.com');
+
                 let serverUrl;
                 if (isLocalhost) {
                     serverUrl = 'http://localhost:3000'; // Local development
+                } else if (isRenderDomain) {
+                    // On Render: use same domain (server and files hosted together)
+                    serverUrl = window.location.origin;
                 } else {
-                    // Production: GitHub Pages connects to Vercel server
-                    serverUrl = VERCEL_SERVER;
+                    // GitHub Pages: connect to Render server
+                    serverUrl = RENDER_SERVER;
                 }
 
                 console.log(`🔌 Connecting to: ${serverUrl}`);
