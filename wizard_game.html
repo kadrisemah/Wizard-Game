@@ -1058,6 +1058,102 @@
             color: var(--text-primary);
         }
 
+        .bid-history-total {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 2px solid rgba(139, 92, 246, 0.3);
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .bid-history-total .total-label {
+            color: var(--accent);
+        }
+
+        .bid-history-total .total-value {
+            color: var(--wizard-gold);
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Rules Modal Styles */
+        .rules-tab {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .rules-tab:hover {
+            color: var(--text-primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .rules-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .rules-content {
+            display: none;
+        }
+
+        .rules-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .rules-section {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .rules-section h4 {
+            color: var(--primary);
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .rules-section p, .rules-section li {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .rules-section ul, .rules-section ol {
+            padding-left: 1.5rem;
+        }
+
+        .rules-section table {
+            margin-top: 0.75rem;
+        }
+
+        .rules-section table th {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .rules-section table td {
+            color: var(--text-secondary);
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255,255,255,0.2) !important;
+            transform: rotate(90deg);
+        }
+
         .bid-history-item .bid-amount {
             font-family: 'Orbitron', monospace;
             font-weight: 700;
@@ -2331,6 +2427,12 @@
                     <span class="btn-text">LOCAL GAME</span>
                     <span class="btn-subtitle">Play on this device</span>
                 </button>
+
+                <button class="lobby-btn" onclick="openRulesModal()" style="background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%); margin-top: 1rem;">
+                    <span class="btn-icon">📖</span>
+                    <span class="btn-text">HOW TO PLAY</span>
+                    <span class="btn-subtitle">Learn the rules</span>
+                </button>
             </div>
 
             <div class="connection-status">
@@ -2625,6 +2727,272 @@
                     ✓ New Game
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Leave Game Confirmation Modal -->
+    <div class="modal-overlay" id="leaveGameModal">
+        <div class="modal" style="max-width: 450px;">
+            <h2 class="modal-title" style="color: #FFA500;">👋 Leave Game?</h2>
+            <div style="text-align: center; margin: 2rem 0;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">😢</div>
+                <p class="modal-text" style="font-size: 1.1rem;">
+                    Are you sure you want to leave the game<br>and return to the lobby?
+                </p>
+                <p style="color: var(--text-secondary); margin-top: 1.5rem; font-size: 0.9rem;">
+                    ⚠️ Your current progress will be lost
+                </p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" style="flex: 1; background: var(--bg-secondary); border: 2px solid var(--primary);" onclick="closeLeaveGameModal()">
+                    ❌ Stay
+                </button>
+                <button class="btn btn-start" style="flex: 1; background: linear-gradient(135deg, #FFA500 0%, #FF6347 100%);" onclick="confirmLeaveGame()">
+                    ✓ Leave
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close-btn" onclick="closeRulesModal()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease;">✕</button>
+
+            <h2 class="modal-title" style="color: var(--wizard-gold); font-size: 2rem; margin-bottom: 1.5rem;">
+                🎴 WIZARD GAME RULES
+            </h2>
+
+            <!-- Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 2px solid rgba(139, 92, 246, 0.3);">
+                <button class="rules-tab active" onclick="switchRulesTab('quick')" id="quickTab">
+                    ⚡ Quick Start
+                </button>
+                <button class="rules-tab" onclick="switchRulesTab('detailed')" id="detailedTab">
+                    📖 Detailed Rules
+                </button>
+                <button class="rules-tab" onclick="switchRulesTab('advanced')" id="advancedTab">
+                    🎯 Pro Tips
+                </button>
+            </div>
+
+            <!-- Quick Start Tab -->
+            <div id="quickRules" class="rules-content active">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">🚀 Quick Start Guide</h3>
+
+                <div class="rules-section">
+                    <h4>🎯 GOAL</h4>
+                    <p>Predict EXACTLY how many tricks you'll win. Score points for accuracy!</p>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🎴 CARDS</h4>
+                    <p><strong>60 cards total:</strong></p>
+                    <ul>
+                        <li>🪨 <strong>Dwarf</strong> (Brown suit, 13 cards)</li>
+                        <li>🌿 <strong>Elf</strong> (Green suit, 13 cards)</li>
+                        <li>⚔️ <strong>Giant</strong> (Red suit, 13 cards)</li>
+                        <li>💧 <strong>Human</strong> (Blue suit, 13 cards)</li>
+                        <li>⭐ <strong>Wizard</strong> (4 cards) - ALWAYS WINS!</li>
+                        <li>🃏 <strong>Jester</strong> (4 cards) - ALWAYS LOSES!</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🎮 HOW TO PLAY</h4>
+                    <ol>
+                        <li><strong>Deal:</strong> Round 1 = 1 card each, Round 2 = 2 cards, etc.</li>
+                        <li><strong>Trump:</strong> Flip a card. That suit is trump (beats all others)</li>
+                        <li><strong>Bid:</strong> Dealer bids first. Predict your tricks!</li>
+                        <li><strong>Play:</strong> Player left of dealer plays first card</li>
+                        <li><strong>Follow Suit:</strong> You must play same suit if you have it</li>
+                        <li><strong>Win Trick:</strong> Wizard > Trump > Lead Suit > Others</li>
+                    </ol>
+                </div>
+
+                <div class="rules-section">
+                    <h4>💰 SCORING</h4>
+                    <ul>
+                        <li>✅ <strong>Exact Bid:</strong> +20 + (10 × tricks won)</li>
+                        <li>❌ <strong>Wrong Bid:</strong> -10 × difference</li>
+                    </ul>
+                    <p style="margin-top: 0.5rem;"><em>Example: Bid 3, won 3 = +50 points | Bid 2, won 5 = -30 points</em></p>
+                </div>
+            </div>
+
+            <!-- Detailed Rules Tab -->
+            <div id="detailedRules" class="rules-content">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">📖 Detailed Rules</h3>
+
+                <div class="rules-section">
+                    <h4>🔄 GAME FLOW</h4>
+                    <ol>
+                        <li><strong>20 Rounds Total</strong> - Game lasts exactly 20 rounds</li>
+                        <li><strong>Dealer Rotates</strong> anticlockwise each round</li>
+                        <li><strong>Cards Per Round:</strong> Round number = cards dealt</li>
+                        <li><strong>Elimination:</strong> Lowest scorers eliminated at rounds 10, 12, 15 (6 players)</li>
+                    </ol>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🎺 TRUMP CARD RULES</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
+                            <th style="text-align: left; padding: 0.5rem;">Card Flipped</th>
+                            <th style="text-align: left; padding: 0.5rem;">Trump Result</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">🪨🌿⚔️💧 Regular Suit</td>
+                            <td style="padding: 0.5rem;">That suit is trump</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">⭐ Wizard</td>
+                            <td style="padding: 0.5rem;"><strong>Dealer chooses</strong> any suit</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">🃏 Jester</td>
+                            <td style="padding: 0.5rem;">NO trump this round</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">Round 20 (no cards left)</td>
+                            <td style="padding: 0.5rem;">NO trump</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🎯 BIDDING RULES</h4>
+                    <ul>
+                        <li>Dealer bids <strong>first</strong></li>
+                        <li>Bidding goes <strong>anticlockwise</strong></li>
+                        <li>Bid from <strong>0 to round number</strong></li>
+                        <li>Total bids can be more or less than tricks available</li>
+                        <li>Last player to bid has most information!</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🃏 PLAYING TRICKS</h4>
+                    <ul>
+                        <li>Player <strong>left of dealer</strong> leads first card</li>
+                        <li>Play continues <strong>anticlockwise</strong></li>
+                        <li><strong>Must follow suit</strong> if you have it</li>
+                        <li>If you can't follow suit, play anything</li>
+                        <li>Wizards & Jesters can be played anytime</li>
+                        <li>Trick winner leads next trick</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🏆 WINNING TRICKS - Priority Order</h4>
+                    <ol>
+                        <li>⭐ <strong>Wizard</strong> - Always wins (first wizard played wins if multiple)</li>
+                        <li>🎺 <strong>Trump Suit</strong> - Beats non-trump (highest trump wins)</li>
+                        <li>🎴 <strong>Lead Suit</strong> - Highest card of lead suit wins</li>
+                        <li>🃏 <strong>Jester</strong> - Always loses (if only jesters, first played wins)</li>
+                    </ol>
+                </div>
+
+                <div class="rules-section">
+                    <h4>💯 SCORING EXAMPLES</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
+                            <th style="text-align: left; padding: 0.5rem;">Bid</th>
+                            <th style="text-align: left; padding: 0.5rem;">Won</th>
+                            <th style="text-align: left; padding: 0.5rem;">Score</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">3</td>
+                            <td style="padding: 0.5rem;">3</td>
+                            <td style="padding: 0.5rem; color: var(--success);">+50 (20 + 30)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">2</td>
+                            <td style="padding: 0.5rem;">5</td>
+                            <td style="padding: 0.5rem; color: var(--danger);">-30 (off by 3)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">0</td>
+                            <td style="padding: 0.5rem;">0</td>
+                            <td style="padding: 0.5rem; color: var(--success);">+20 (exact!)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">4</td>
+                            <td style="padding: 0.5rem;">1</td>
+                            <td style="padding: 0.5rem; color: var(--danger);">-30 (off by 3)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Advanced Tips Tab -->
+            <div id="advancedRules" class="rules-content">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">🎯 Pro Tips & Strategy</h3>
+
+                <div class="rules-section">
+                    <h4>💡 BIDDING STRATEGY</h4>
+                    <ul>
+                        <li><strong>Wizards = Guaranteed Tricks</strong> - Always count them!</li>
+                        <li><strong>High Trumps</strong> (A, K, Q) = Very likely to win</li>
+                        <li><strong>Aces in Non-Trump</strong> = 70% win rate</li>
+                        <li><strong>Void in a Suit?</strong> = Can trump it if you have trump cards</li>
+                        <li><strong>Jesters</strong> = Never win, but can dump safely</li>
+                        <li><strong>Bid Last?</strong> = Advantage! You know everyone's bids</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🎴 PLAYING STRATEGY</h4>
+                    <ul>
+                        <li><strong>Leading:</strong> Play high if you need tricks, low if you don't</li>
+                        <li><strong>Following:</strong> Try to win if behind, dump if ahead</li>
+                        <li><strong>Trump Cards:</strong> Save them or use them strategically</li>
+                        <li><strong>Wizards:</strong> Use to guarantee critical tricks</li>
+                        <li><strong>Jesters:</strong> Play when you don't want the trick</li>
+                        <li><strong>Watch Bids:</strong> Know who wants tricks and who doesn't!</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🧠 ADVANCED TACTICS</h4>
+                    <ul>
+                        <li><strong>Card Counting:</strong> Track which suits have been played</li>
+                        <li><strong>Trump Management:</strong> Don't waste high trumps early</li>
+                        <li><strong>Blocking:</strong> Prevent others from making their bids</li>
+                        <li><strong>Jester Timing:</strong> Play when someone else will win anyway</li>
+                        <li><strong>Position Awareness:</strong> Being last to play = huge advantage</li>
+                        <li><strong>Risk vs Reward:</strong> Sometimes bid 0 for easy +20 points</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>⚠️ COMMON MISTAKES</h4>
+                    <ul>
+                        <li>❌ Forgetting to count Wizards as guaranteed tricks</li>
+                        <li>❌ Bidding too aggressively without trump cards</li>
+                        <li>❌ Not following suit when required (illegal!)</li>
+                        <li>❌ Playing Wizard too early in the round</li>
+                        <li>❌ Ignoring other players' bids</li>
+                        <li>❌ Focusing only on your cards, not the flow of play</li>
+                    </ul>
+                </div>
+
+                <div class="rules-section">
+                    <h4>🏅 WINNING TIPS</h4>
+                    <p><strong>The key to winning Wizard is ACCURACY, not ambition!</strong></p>
+                    <ul>
+                        <li>✅ Better to bid 1 and make it (+30) than bid 3 and miss (-20+)</li>
+                        <li>✅ Conservative bids are safer early in the game</li>
+                        <li>✅ Take calculated risks when behind on points</li>
+                        <li>✅ Control tempo - decide when to take tricks</li>
+                        <li>✅ Remember: Everyone can't make their bid - use this!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn btn-start" onclick="closeRulesModal()" style="margin-top: 2rem;">
+                ✓ Got It!
+            </button>
         </div>
     </div>
 
@@ -3268,6 +3636,38 @@
                 <span class="bid-amount">${bid}</span>
             `;
             historyList.appendChild(bidItem);
+
+            // Update total tricks bid
+            updateBidTotal();
+        }
+
+        function updateBidTotal() {
+            const historyList = document.getElementById('bidHistoryList');
+
+            // Calculate total bids
+            const activePlayers = gameState.players.filter(p => !gameState.eliminated || !gameState.eliminated.includes(p));
+            const totalBids = activePlayers.reduce((sum, player) => {
+                const bid = gameState.bids[player];
+                return sum + (bid !== null && bid !== undefined ? bid : 0);
+            }, 0);
+
+            // Remove existing total if any
+            const existingTotal = historyList.querySelector('.bid-history-total');
+            if (existingTotal) {
+                existingTotal.remove();
+            }
+
+            // Add total if all players have bid
+            const biddedPlayers = activePlayers.filter(p => gameState.bids[p] !== null && gameState.bids[p] !== undefined);
+            if (biddedPlayers.length >= activePlayers.length) {
+                const totalItem = document.createElement('div');
+                totalItem.className = 'bid-history-total';
+                totalItem.innerHTML = `
+                    <span class="total-label">Total Expected:</span>
+                    <span class="total-value">${totalBids} tricks</span>
+                `;
+                historyList.appendChild(totalItem);
+            }
         }
 
         function clearBidHistory() {
@@ -4162,6 +4562,30 @@
             showToast('Returning to setup...', 'info', 2000);
         }
 
+        // ===== RULES MODAL FUNCTIONS =====
+
+        function openRulesModal() {
+            document.getElementById('rulesModal').classList.add('active');
+            playSound('cardPlace');
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rulesModal').classList.remove('active');
+            playSound('cardPlace');
+        }
+
+        function switchRulesTab(tabName) {
+            // Remove active from all tabs and contents
+            document.querySelectorAll('.rules-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.rules-content').forEach(content => content.classList.remove('active'));
+
+            // Add active to selected tab and content
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            document.getElementById(`${tabName}Rules`).classList.add('active');
+
+            playSound('cardPlay');
+        }
+
         // ===== SOUND EFFECTS SYSTEM =====
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -4905,16 +5329,29 @@
         }
 
         function leaveGame() {
-            if (confirm('Are you sure you want to leave the game and return to lobby?')) {
-                // Leave online room if in online mode
-                if (onlineMode && currentRoom) {
-                    socket.emit('leave-room', { roomCode: currentRoom });
-                }
+            // Show custom modal instead of browser confirm
+            document.getElementById('leaveGameModal').classList.add('active');
+            playSound('cardPlace');
+        }
 
-                // Reset all game state
-                currentRoom = null;
-                isHost = false;
-                onlineMode = false;
+        function closeLeaveGameModal() {
+            document.getElementById('leaveGameModal').classList.remove('active');
+            playSound('cardPlace');
+        }
+
+        function confirmLeaveGame() {
+            document.getElementById('leaveGameModal').classList.remove('active');
+            playSound('bidConfirm');
+
+            // Leave online room if in online mode
+            if (onlineMode && currentRoom) {
+                socket.emit('leave-room', { roomCode: currentRoom });
+            }
+
+            // Reset all game state
+            currentRoom = null;
+            isHost = false;
+            onlineMode = false;
 
                 // Hide game screen, show lobby
                 document.getElementById('gameScreen').style.display = 'none';
