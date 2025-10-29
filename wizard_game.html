@@ -4353,16 +4353,20 @@
             for (let i = 1; i < gameState.currentTrick.length; i++) {
                 const currentPlay = gameState.currentTrick[i];
 
-                // Wizard wins
-                if (currentPlay.card.suit === 'wizard') {
-                    if (winningPlay.card.suit !== 'wizard') {
-                        winningPlayIndex = i;
-                        winningPlay = currentPlay;
-                    }
+                // PRIORITY 1: Wizard ALWAYS wins (if winning card is already Wizard, first Wizard keeps winning)
+                if (winningPlay.card.suit === 'wizard') {
+                    // Winning card is Wizard, nothing can beat it
                     continue;
                 }
 
-                // Jester loses
+                // Current card is Wizard and winning is NOT Wizard - Wizard wins!
+                if (currentPlay.card.suit === 'wizard') {
+                    winningPlayIndex = i;
+                    winningPlay = currentPlay;
+                    continue;
+                }
+
+                // PRIORITY 2: Jester always loses
                 if (currentPlay.card.suit === 'jester') continue;
                 if (winningPlay.card.suit === 'jester') {
                     winningPlayIndex = i;
@@ -4370,7 +4374,7 @@
                     continue;
                 }
 
-                // Trump beats non-trump
+                // PRIORITY 3: Trump beats non-trump
                 if (gameState.trumpSuit) {
                     const currentIsTrump = currentPlay.card.suit === gameState.trumpSuit;
                     const winningIsTrump = winningPlay.card.suit === gameState.trumpSuit;
@@ -4390,7 +4394,7 @@
                     }
                 }
 
-                // Lead suit
+                // PRIORITY 4: Lead suit (higher value wins)
                 if (currentPlay.card.suit === gameState.leadSuit && winningPlay.card.suit === gameState.leadSuit) {
                     if (currentPlay.card.value > winningPlay.card.value) {
                         winningPlayIndex = i;
