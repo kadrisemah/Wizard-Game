@@ -2391,6 +2391,9 @@
                 <button class="new-game-btn" onclick="confirmNewGame()" title="Start New Game">
                     🔄 NEW GAME
                 </button>
+                <button class="leave-room-btn" onclick="leaveGame()" title="Leave Game & Return to Lobby" style="margin-left: 0.5rem;">
+                    ← LEAVE GAME
+                </button>
                 <div class="trump-card-display">
                     <span class="trump-label">Trump:</span>
                     <span class="trump-suit" id="trumpDisplay">—</span>
@@ -4106,6 +4109,11 @@
                     document.getElementById('displayRoomCode').textContent = roomCode;
                     updatePlayersList(playerList);
                     showWaitingRoom();
+
+                    // Check if can start (for host with min players)
+                    updateWaitingStatus(playerList, playerList.length >= 3);
+                    const startBtn = document.getElementById('startGameBtn');
+                    startBtn.style.display = playerList.length >= 3 ? 'flex' : 'none';
                 });
 
                 // Handle room joined
@@ -4133,6 +4141,16 @@
                     updatePlayersList(playerList);
                     showToast(`${newPlayer} joined!`, 'info', 2000);
                     playSound('cardPlace');
+
+                    // Update waiting status and button for host
+                    const allReady = playerList.every(p => p.isReady || p.isHost);
+                    const canStart = playerList.length >= 3 && allReady;
+                    updateWaitingStatus(playerList, canStart);
+
+                    if (isHost) {
+                        const startBtn = document.getElementById('startGameBtn');
+                        startBtn.style.display = canStart ? 'flex' : 'none';
+                    }
                 });
 
                 // Handle player left
@@ -4294,6 +4312,33 @@
             const btn = document.getElementById('readyBtn');
             btn.classList.remove('active');
             document.getElementById('readyBtnText').textContent = 'READY';
+        }
+
+        function leaveGame() {
+            if (confirm('Are you sure you want to leave the game and return to lobby?')) {
+                // Leave online room if in online mode
+                if (onlineMode && currentRoom) {
+                    socket.emit('leave-room', { roomCode: currentRoom });
+                }
+
+                // Reset all game state
+                currentRoom = null;
+                isHost = false;
+                onlineMode = false;
+
+                // Hide game screen, show lobby
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('setupScreen').style.display = 'none';
+                document.getElementById('waitingRoomScreen').style.display = 'none';
+                document.getElementById('lobbyScreen').style.display = 'flex';
+
+                // Reset ready button
+                const btn = document.getElementById('readyBtn');
+                btn.classList.remove('active');
+                document.getElementById('readyBtnText').textContent = 'READY';
+
+                showToast('Returned to lobby', 'info', 2000);
+            }
         }
 
         /* ═══════════════════════════════════════════════════════════════ */
