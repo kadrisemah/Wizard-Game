@@ -3385,8 +3385,8 @@
                 card: card
             });
 
-            // Set lead suit
-            if (gameState.currentTrick.length === 1 && card.suit !== 'jester' && card.suit !== 'wizard') {
+            // Set lead suit - FIRST non-Wizard/non-Jester card determines suit
+            if (!gameState.leadSuit && card.suit !== 'jester' && card.suit !== 'wizard') {
                 gameState.leadSuit = card.suit;
                 console.log(`🎯 Lead suit set to: ${gameState.leadSuit}`);
             }
