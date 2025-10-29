@@ -3293,8 +3293,13 @@
 
         function startPlaying() {
             gameState.phase = 'playing';
-            gameState.leadPlayerIndex = (gameState.dealerIndex + 1) % gameState.players.length;
+
+            // SAME player who bid first also plays first (left of dealer in anticlockwise)
+            // This matches startBidding() logic
+            const startIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
+            gameState.leadPlayerIndex = getNextActivePlayerIndex(startIndex);
             gameState.currentPlayerIndex = gameState.leadPlayerIndex;
+
             updatePhaseDisplay();
             updateUI();
             updateActivePlayer(gameState.currentPlayerIndex);
