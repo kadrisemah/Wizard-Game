@@ -3328,40 +3328,103 @@
         /*   SMART AI LOGIC - PROFESSIONAL BOT SYSTEM                      */
         /* ═══════════════════════════════════════════════════════════════ */
 
+        /* ═══════════════════════════════════════════════════════════════ */
+        /*   SUPER INTELLIGENT AI - PROFESSIONAL LEVEL                     */
+        /* ═══════════════════════════════════════════════════════════════ */
+
         function calculateAIBid(playerIndex) {
             const player = gameState.players[playerIndex];
             const hand = gameState.playerHands[player];
             const trumpSuit = gameState.trumpSuit;
+            const numPlayers = gameState.players.filter(p => !gameState.eliminated || !gameState.eliminated.includes(p)).length;
 
             let estimatedTricks = 0;
+            let certainTricks = 0;
+            let probableTricks = 0;
+            let possibleTricks = 0;
 
-            // Count wizards (guaranteed wins)
+            // === GUARANTEED TRICKS (100% win rate) ===
             const wizards = hand.filter(c => c.suit === 'wizard').length;
-            estimatedTricks += wizards;
+            certainTricks += wizards;
 
-            // Count trump cards
-            const trumpCards = hand.filter(c => c.suit === trumpSuit);
-            const highTrumps = trumpCards.filter(c => {
-                const value = c.rank === 'A' ? 14 : c.rank === 'K' ? 13 : c.rank === 'Q' ? 12 : c.rank === 'J' ? 11 : parseInt(c.rank) || 0;
-                return value >= 10; // J, Q, K, A
-            }).length;
-            estimatedTricks += Math.floor(highTrumps * 0.7); // 70% chance high trumps win
+            // === TRUMP ANALYSIS ===
+            const trumpCards = hand.filter(c => c.suit === trumpSuit && c.suit !== 'wizard' && c.suit !== 'jester');
+            if (trumpCards.length > 0) {
+                // High trumps (A, K, Q) - 85% win rate
+                const highTrumps = trumpCards.filter(c => ['A', 'K', 'Q'].includes(c.rank)).length;
+                probableTricks += highTrumps * 0.85;
 
-            // Count aces in non-trump suits
-            hand.forEach(card => {
-                if (card.suit !== trumpSuit && card.suit !== 'wizard' && card.suit !== 'jester' && card.rank === 'A') {
-                    estimatedTricks += 0.5; // 50% chance ace wins
+                // Medium trumps (J, 10, 9) - 60% win rate if have many trumps
+                const mediumTrumps = trumpCards.filter(c => ['J', '10', '9'].includes(c.rank)).length;
+                if (trumpCards.length >= 3) probableTricks += mediumTrumps * 0.6;
+                else possibleTricks += mediumTrumps * 0.3;
+
+                // Low trumps - only count if many trumps (can exhaust others)
+                if (trumpCards.length >= 4) {
+                    const lowTrumps = trumpCards.filter(c => parseInt(c.rank) <= 8 && parseInt(c.rank) >= 2).length;
+                    possibleTricks += lowTrumps * 0.2;
+                }
+            }
+
+            // === NON-TRUMP SUIT ANALYSIS ===
+            const suitCounts = {};
+            ['hearts', 'diamonds', 'clubs', 'spades'].forEach(suit => {
+                if (suit !== trumpSuit) {
+                    const suitCards = hand.filter(c => c.suit === suit);
+                    suitCounts[suit] = suitCards;
+
+                    if (suitCards.length > 0) {
+                        // Aces - 70% win if not trump suit
+                        const aces = suitCards.filter(c => c.rank === 'A').length;
+                        probableTricks += aces * 0.7;
+
+                        // Kings - 50% win if also have ace or multiple cards
+                        const kings = suitCards.filter(c => c.rank === 'K').length;
+                        if (suitCards.length >= 2 || aces > 0) {
+                            probableTricks += kings * 0.5;
+                        } else {
+                            possibleTricks += kings * 0.3;
+                        }
+
+                        // Queens - 30% win if strong suit
+                        const queens = suitCards.filter(c => c.rank === 'Q').length;
+                        if (suitCards.length >= 3) {
+                            possibleTricks += queens * 0.3;
+                        }
+
+                        // Void in suit (no cards) = good for trumping if have trumps
+                        if (suitCards.length === 0 && trumpCards.length > 0) {
+                            possibleTricks += 0.3; // Can trump this suit
+                        }
+                    }
                 }
             });
 
-            // Don't count jesters (they lose)
+            // === JESTER PENALTY ===
             const jesters = hand.filter(c => c.suit === 'jester').length;
+            // Jesters always lose - reduce estimates
+            possibleTricks -= jesters * 0.3;
 
-            // Round and add slight randomness for realism
-            const randomFactor = Math.random() * 0.5 - 0.25; // -0.25 to +0.25
-            estimatedTricks = Math.max(0, Math.min(gameState.currentRound, Math.round(estimatedTricks + randomFactor)));
+            // === POSITION FACTOR ===
+            // Later position = more info = slightly better
+            const positionBonus = playerIndex * 0.05;
 
-            console.log(`🤖 AI ${player} estimates ${estimatedTricks} tricks (${wizards} wizards, ${highTrumps} high trumps, ${jesters} jesters)`);
+            // === CALCULATE TOTAL ===
+            estimatedTricks = certainTricks + probableTricks + possibleTricks + positionBonus;
+
+            // === RISK ADJUSTMENT based on player count ===
+            // More players = more competition = be conservative
+            const conservativeFactor = (numPlayers - 2) * 0.1;
+            estimatedTricks *= (1 - conservativeFactor);
+
+            // === ADD SLIGHT RANDOMNESS for realism ===
+            const randomFactor = (Math.random() - 0.5) * 0.3; // -0.15 to +0.15
+            estimatedTricks += randomFactor;
+
+            // === BOUNDS CHECK ===
+            estimatedTricks = Math.max(0, Math.min(gameState.currentRound, Math.round(estimatedTricks)));
+
+            console.log(`🧠 AI ${player} SMART BID: ${estimatedTricks} tricks | Certain:${certainTricks} Probable:${probableTricks.toFixed(1)} Possible:${possibleTricks.toFixed(1)} | Wizards:${wizards} Trumps:${trumpCards.length} Jesters:${jesters}`);
             return estimatedTricks;
         }
 
