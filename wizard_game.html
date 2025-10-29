@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#8B5CF6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Wizard • Complete Card Game</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512x512.png">
+    <link rel="shortcut icon" href="./icons/icon-192x192.png">
+
+    <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 
@@ -4110,10 +4117,8 @@
                     updatePlayersList(playerList);
                     showWaitingRoom();
 
-                    // Check if can start (for host with min players)
-                    updateWaitingStatus(playerList, playerList.length >= 3);
-                    const startBtn = document.getElementById('startGameBtn');
-                    startBtn.style.display = playerList.length >= 3 ? 'flex' : 'none';
+                    // Update status (host alone, waiting for players)
+                    updateWaitingStatus(playerList, false);
                 });
 
                 // Handle room joined
@@ -4142,15 +4147,8 @@
                     showToast(`${newPlayer} joined!`, 'info', 2000);
                     playSound('cardPlace');
 
-                    // Update waiting status and button for host
-                    const allReady = playerList.every(p => p.isReady || p.isHost);
-                    const canStart = playerList.length >= 3 && allReady;
-                    updateWaitingStatus(playerList, canStart);
-
-                    if (isHost) {
-                        const startBtn = document.getElementById('startGameBtn');
-                        startBtn.style.display = canStart ? 'flex' : 'none';
-                    }
+                    // Update waiting status (updateWaitingStatus handles button display)
+                    updateWaitingStatus(playerList, false);
                 });
 
                 // Handle player left
@@ -4160,15 +4158,10 @@
                     showToast(`${leftPlayer} left`, 'info', 2000);
                 });
 
-                // Handle player list updated
+                // Handle player list updated (when someone clicks READY)
                 socket.on('player-list-updated', ({ playerList, canStart }) => {
                     updatePlayersList(playerList);
                     updateWaitingStatus(playerList, canStart);
-
-                    if (isHost) {
-                        const startBtn = document.getElementById('startGameBtn');
-                        startBtn.style.display = canStart ? 'flex' : 'none';
-                    }
                 });
 
                 // Handle game started
@@ -4239,9 +4232,13 @@
             document.getElementById('joinRoomScreen').style.display = 'none';
             document.getElementById('waitingRoomScreen').style.display = 'flex';
 
-            // Show/hide ready button based on host status
+            // Everyone (including host) needs to click READY
             const readyBtn = document.getElementById('readyBtn');
-            readyBtn.style.display = isHost ? 'none' : 'flex';
+            readyBtn.style.display = 'flex';
+
+            // Reset ready state
+            readyBtn.classList.remove('active');
+            document.getElementById('readyBtnText').textContent = 'READY';
         }
 
         function playLocal() {
@@ -4369,18 +4366,28 @@
         }
 
         function updateWaitingStatus(playerList, canStart) {
-            const readyCount = playerList.filter(p => p.isReady || p.isHost).length;
+            const readyCount = playerList.filter(p => p.isReady).length;
             const totalCount = playerList.length;
             const minPlayers = 3;
 
             const waitingText = document.getElementById('waitingText');
+            const startBtn = document.getElementById('startGameBtn');
 
             if (totalCount < minPlayers) {
-                waitingText.textContent = `Waiting for ${minPlayers - totalCount} more player${minPlayers - totalCount > 1 ? 's' : ''}...`;
+                const needed = minPlayers - totalCount;
+                waitingText.textContent = `⏳ Waiting for ${needed} more player${needed > 1 ? 's' : ''} to join... (Min: ${minPlayers} players)`;
+                waitingText.style.color = 'var(--text-secondary)';
+                if (isHost) startBtn.style.display = 'none';
             } else if (readyCount < totalCount) {
-                waitingText.textContent = `Waiting for ${totalCount - readyCount} player${totalCount - readyCount > 1 ? 's' : ''} to ready up...`;
+                const notReady = totalCount - readyCount;
+                const notReadyPlayers = playerList.filter(p => !p.isReady).map(p => p.name).join(', ');
+                waitingText.textContent = `⏳ Waiting for ${notReady} player${notReady > 1 ? 's' : ''} to ready up: ${notReadyPlayers}`;
+                waitingText.style.color = 'var(--accent)';
+                if (isHost) startBtn.style.display = 'none';
             } else {
-                waitingText.textContent = '🎉 All players ready! Host can start the game';
+                waitingText.textContent = '🎉 All players ready! Host can start the game now!';
+                waitingText.style.color = 'var(--success)';
+                if (isHost) startBtn.style.display = 'flex';
             }
         }
 
