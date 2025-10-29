@@ -4055,9 +4055,12 @@
         function initializeSocket() {
             try {
                 // ═══════════════════════════════════════════════════════════
-                // SMART SERVER CONNECTION - Auto-configured for Vercel
+                // SERVER CONNECTION FOR GITHUB PAGES
                 // ═══════════════════════════════════════════════════════════
-                // Auto-detect server URL
+                // Server hosted on Vercel: https://wizard-game-kadrisemah.vercel.app
+                const VERCEL_SERVER = 'https://wizard-game-kadrisemah.vercel.app';
+
+                // Auto-detect environment
                 const isLocalhost = window.location.hostname === 'localhost' ||
                                    window.location.hostname === '127.0.0.1';
 
@@ -4065,8 +4068,8 @@
                 if (isLocalhost) {
                     serverUrl = 'http://localhost:3000'; // Local development
                 } else {
-                    // Production: Use same domain (Vercel hosts both frontend & server)
-                    serverUrl = window.location.origin;
+                    // Production: GitHub Pages connects to Vercel server
+                    serverUrl = VERCEL_SERVER;
                 }
 
                 console.log(`🔌 Connecting to: ${serverUrl}`);
