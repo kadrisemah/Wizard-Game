@@ -3694,9 +3694,9 @@
         function startPlaying() {
             gameState.phase = 'playing';
 
-            // Playing starts LEFT of dealer (anticlockwise)
+            // Playing starts LEFT of dealer (in clockwise order, left = +1)
             // Note: Dealer bids first, but player LEFT of dealer plays first card
-            const startIndex = (gameState.dealerIndex - 1 + gameState.players.length) % gameState.players.length;
+            const startIndex = (gameState.dealerIndex + 1) % gameState.players.length;
             gameState.leadPlayerIndex = getNextActivePlayerIndex(startIndex);
             gameState.currentPlayerIndex = gameState.leadPlayerIndex;
 
