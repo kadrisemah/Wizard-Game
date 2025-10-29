@@ -271,6 +271,30 @@
             transform: translateY(0);
         }
 
+        .trump-choice-btn {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 2rem 1rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .trump-choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .trump-choice-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
         /* ===== GAME TABLE ===== */
         #gameScreen {
             display: none;
@@ -2483,6 +2507,35 @@
         📊 Complete Your Bid
     </button>
 
+    <!-- Trump Selection Modal (when Wizard is flipped) -->
+    <div class="modal-overlay" id="trumpSelectionModal">
+        <div class="modal">
+            <h2 class="modal-title" style="color: var(--wizard-gold);">⭐ WIZARD TRUMP!</h2>
+            <p class="modal-text">
+                <span id="dealerName">Dealer</span>, a Wizard was flipped!<br>
+                Choose the trump suit for this round:
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+                <button class="trump-choice-btn" onclick="chooseTrumpSuit('dwarf')" style="background: linear-gradient(135deg, #8B4513, #CD853F);">
+                    <div style="font-size: 3rem;">🪨</div>
+                    <div style="font-weight: bold; margin-top: 0.5rem;">DWARF</div>
+                </button>
+                <button class="trump-choice-btn" onclick="chooseTrumpSuit('elf')" style="background: linear-gradient(135deg, #228B22, #90EE90);">
+                    <div style="font-size: 3rem;">🌿</div>
+                    <div style="font-weight: bold; margin-top: 0.5rem;">ELF</div>
+                </button>
+                <button class="trump-choice-btn" onclick="chooseTrumpSuit('giant')" style="background: linear-gradient(135deg, #DC143C, #FF6347);">
+                    <div style="font-size: 3rem;">⚔️</div>
+                    <div style="font-weight: bold; margin-top: 0.5rem;">GIANT</div>
+                </button>
+                <button class="trump-choice-btn" onclick="chooseTrumpSuit('human')" style="background: linear-gradient(135deg, #1E90FF, #87CEEB);">
+                    <div style="font-size: 3rem;">💧</div>
+                    <div style="font-weight: bold; margin-top: 0.5rem;">HUMAN</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bid History Panel -->
     <div class="bid-history-panel" id="bidHistoryPanel" style="display: none;">
         <div class="bid-history-title">
@@ -2971,26 +3024,90 @@
             } else {
                 gameState.trumpCard = null;
                 gameState.trumpSuit = null;
+                updateUI();
+                setTimeout(() => startBidding(), 1500);
             }
-
-            updateUI();
-
-            // Animate card dealing
-            setTimeout(() => {
-                startBidding();
-            }, 1500);
         }
 
         function determineTrumpSuit() {
             if (gameState.trumpCard.suit === 'jester') {
+                // Jester = No trump
                 gameState.trumpSuit = null;
+                console.log('🃏 Jester flipped! NO TRUMP this round.');
+                updateUI();
+                setTimeout(() => startBidding(), 1500);
             } else if (gameState.trumpCard.suit === 'wizard') {
-                // Dealer chooses (for now, random)
-                const regularSuits = ['dwarf', 'elf', 'giant', 'human'];
-                gameState.trumpSuit = regularSuits[Math.floor(Math.random() * regularSuits.length)];
+                // Wizard = Dealer chooses trump
+                console.log('⭐ Wizard flipped! Dealer must choose trump.');
+                updateUI();
+
+                // Check if dealer is human player (player 0)
+                if (gameState.dealerIndex === 0) {
+                    // Show trump selection modal to human dealer
+                    setTimeout(() => {
+                        showTrumpSelectionModal();
+                    }, 1500);
+                } else {
+                    // AI dealer chooses trump (strategic or random)
+                    setTimeout(() => {
+                        const chosenSuit = aiChooseTrumpSuit();
+                        gameState.trumpSuit = chosenSuit;
+                        const dealerName = gameState.players[gameState.dealerIndex];
+                        console.log(`🤖 Dealer ${dealerName} chose ${chosenSuit.toUpperCase()} as trump!`);
+                        showToast(`Dealer chose ${SUITS[chosenSuit].symbol} ${chosenSuit.toUpperCase()} as trump!`, 'info', 3000);
+                        updateUI();
+                        setTimeout(() => startBidding(), 2000);
+                    }, 1500);
+                }
             } else {
+                // Regular card = That suit is trump
                 gameState.trumpSuit = gameState.trumpCard.suit;
+                console.log(`🎴 Trump suit: ${gameState.trumpSuit.toUpperCase()}`);
+                updateUI();
+                setTimeout(() => startBidding(), 1500);
             }
+        }
+
+        function showTrumpSelectionModal() {
+            const dealerName = gameState.players[gameState.dealerIndex];
+            document.getElementById('dealerName').textContent = dealerName;
+            document.getElementById('trumpSelectionModal').classList.add('active');
+            playSound('cardPlace');
+        }
+
+        function chooseTrumpSuit(suit) {
+            gameState.trumpSuit = suit;
+            document.getElementById('trumpSelectionModal').classList.remove('active');
+            console.log(`👤 Dealer chose ${suit.toUpperCase()} as trump!`);
+            showToast(`You chose ${SUITS[suit].symbol} ${suit.toUpperCase()} as trump!`, 'success', 3000);
+            playSound('bidConfirm');
+            updateUI();
+            setTimeout(() => startBidding(), 1000);
+        }
+
+        function aiChooseTrumpSuit() {
+            const dealerPlayer = gameState.players[gameState.dealerIndex];
+            const hand = gameState.playerHands[dealerPlayer];
+
+            // Count cards of each suit in dealer's hand
+            const suitCounts = {
+                dwarf: hand.filter(c => c.suit === 'dwarf').length,
+                elf: hand.filter(c => c.suit === 'elf').length,
+                giant: hand.filter(c => c.suit === 'giant').length,
+                human: hand.filter(c => c.suit === 'human').length
+            };
+
+            // Choose suit with most cards (strategic)
+            let maxSuit = 'dwarf';
+            let maxCount = suitCounts.dwarf;
+            Object.keys(suitCounts).forEach(suit => {
+                if (suitCounts[suit] > maxCount) {
+                    maxCount = suitCounts[suit];
+                    maxSuit = suit;
+                }
+            });
+
+            return maxSuit;
         }
 
         function getNextActivePlayerIndex(startIndex) {
