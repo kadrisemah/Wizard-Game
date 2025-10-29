@@ -56,10 +56,10 @@ Once a card is played:
 
 ### Trump Suit Rules
 - Jester flipped = No trump ✅
-- Wizard flipped = Dealer chooses ✅
+- Wizard flipped = **Dealer manually chooses** (UI modal for human, strategic for AI) ✅
 - Regular card = That suit is trump ✅
 - Last round = No trump ✅
-- ✅ **CORRECT**
+- ✅ **CORRECT & FULLY IMPLEMENTED**
 
 ### Trick-Taking Rules
 **Priority (highest to lowest):**
