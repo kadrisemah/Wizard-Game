@@ -5353,19 +5353,18 @@
             isHost = false;
             onlineMode = false;
 
-                // Hide game screen, show lobby
-                document.getElementById('gameScreen').style.display = 'none';
-                document.getElementById('setupScreen').style.display = 'none';
-                document.getElementById('waitingRoomScreen').style.display = 'none';
-                document.getElementById('lobbyScreen').style.display = 'flex';
+            // Hide game screen, show lobby
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('waitingRoomScreen').style.display = 'none';
+            document.getElementById('lobbyScreen').style.display = 'flex';
 
-                // Reset ready button
-                const btn = document.getElementById('readyBtn');
-                btn.classList.remove('active');
-                document.getElementById('readyBtnText').textContent = 'READY';
+            // Reset ready button
+            const btn = document.getElementById('readyBtn');
+            btn.classList.remove('active');
+            document.getElementById('readyBtnText').textContent = 'READY';
 
-                showToast('Returned to lobby', 'info', 2000);
-            }
+            showToast('Returned to lobby', 'info', 2000);
         }
 
         /* ═══════════════════════════════════════════════════════════════ */
