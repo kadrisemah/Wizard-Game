@@ -1,12 +1,12 @@
 {
-  "name": "Wizard Tournament Tracker",
+  "name": "Wizard Card Game Online",
   "short_name": "Wizard",
-  "description": "Professional tournament score tracker for Wizard card game with German elimination system",
-  "start_url": "./wizard_app.html",
+  "description": "Play Wizard card game online with friends or locally. Professional multiplayer experience with rooms, real-time sync, and PWA support.",
+  "start_url": "./wizard_game.html",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#8B5CF6",
-  "orientation": "portrait",
+  "orientation": "any",
   "scope": "./",
   "icons": [
     {
@@ -58,7 +58,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["games", "entertainment", "utilities"],
+  "categories": ["games", "entertainment"],
   "screenshots": [
     {
       "src": "./screenshots/mobile-1.png",
@@ -68,10 +68,17 @@
   ],
   "shortcuts": [
     {
-      "name": "Start New Game",
-      "short_name": "New Game",
-      "description": "Start a new tournament",
-      "url": "./wizard_app.html",
+      "name": "Play Online",
+      "short_name": "Online",
+      "description": "Play with friends online",
+      "url": "./wizard_game.html",
+      "icons": [{ "src": "./icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Local Game",
+      "short_name": "Local",
+      "description": "Play offline on this device",
+      "url": "./wizard_game.html?mode=local",
       "icons": [{ "src": "./icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],

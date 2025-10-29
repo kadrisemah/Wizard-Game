@@ -1,8 +1,11 @@
-const CACHE_NAME = 'wizard-tournament-v1.0.0';
+const CACHE_NAME = 'wizard-game-online-v2.0.0';
 const urlsToCache = [
-  './wizard_app.html',
+  './wizard_game.html',
   './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap'
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png',
+  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap',
+  'https://cdn.socket.io/4.6.1/socket.io.min.js'
 ];
 
 // Install event - cache resources
@@ -46,6 +49,13 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Skip caching for Socket.io and API requests
+  if (event.request.url.includes('/socket.io/') ||
+      event.request.url.includes('sockjs') ||
+      event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -76,7 +86,7 @@ self.addEventListener('fetch', (event) => {
         }).catch((error) => {
           console.error('[Service Worker] Fetch failed:', error);
           // Return offline page or fallback content
-          return caches.match('./wizard_app.html');
+          return caches.match('./wizard_game.html');
         });
       })
   );
@@ -103,51 +113,13 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Background sync for offline score saving (future enhancement)
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-scores') {
-    event.waitUntil(syncScores());
-  }
-});
-
-async function syncScores() {
-  // This would sync saved game data when connection is restored
-  console.log('[Service Worker] Syncing scores...');
-  // Implementation for syncing saved games to server
-}
-
-// Push notification support (future enhancement)
-self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'New tournament update!',
-    icon: './icons/icon-192x192.png',
-    badge: './icons/icon-72x72.png',
-    vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
-    actions: [
-      {
-        action: 'open',
-        title: 'Open App',
-        icon: './icons/icon-96x96.png'
-      }
-    ]
-  };
-
-  event.waitUntil(
-    self.registration.showNotification('Wizard Tournament', options)
-  );
-});
-
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   event.waitUntil(
-    clients.openWindow('./wizard_app.html')
+    clients.openWindow('./wizard_game.html')
   );
 });
 
-console.log('[Service Worker] Loaded');
+console.log('[Service Worker] Wizard Card Game Online - Loaded');

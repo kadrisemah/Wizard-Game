@@ -3,6 +3,10 @@
   "name": "wizard-tournament",
   "builds": [
     {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "**/*.html",
       "use": "@vercel/static"
     },
@@ -21,8 +25,16 @@
   ],
   "routes": [
     {
+      "src": "/socket.io/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/",
       "dest": "/index.html"
+    },
+    {
+      "src": "/wizard_game.html",
+      "dest": "/wizard_game.html"
     },
     {
       "src": "/wizard_app.html",
